@@ -10,7 +10,7 @@ type Resource = {
 
 const formatBytes = (value: number) => value >= 1024 * 1024 ? `${(value / 1024 / 1024).toFixed(1)} MB` : `${Math.ceil(value / 1024)} KB`;
 
-export default function AdminPanel({ adminName, signOutUrl }: { adminName: string; signOutUrl: string }) {
+export default function AdminPanel() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -52,8 +52,13 @@ export default function AdminPanel({ adminName, signOutUrl }: { adminName: strin
     setBusy(false);
   }
 
+  async function logout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    window.location.href = "/";
+  }
+
   return <main className="admin-shell">
-    <header className="admin-header"><a className="brand" href="/"><img src="/ebi-icon.png" alt=""/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></a><div><span>{adminName}</span><a href="/">查看网站</a><a href={signOutUrl}>退出登录</a></div></header>
+    <header className="admin-header"><a className="brand" href="/"><img src="/ebi-icon.png" alt=""/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></a><div><span>管理员模式</span><a href="/">查看网站</a><button className="link-button" onClick={logout}>退出登录</button></div></header>
     <section className="admin-hero"><p>EBI ADMIN MODE</p><h1>网站上线后，也可以随时上传资料。</h1><p>PDF、Word、Excel 和视频会永久保存。设置为“已发布”后，访客无需重新部署网站即可看到。</p></section>
     <section className="admin-grid">
       <form className="upload-card" onSubmit={upload}>

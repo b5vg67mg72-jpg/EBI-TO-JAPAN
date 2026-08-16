@@ -734,6 +734,7 @@ footer {
 .admin-header { min-height: 82px; padding: 15px 5vw; display: flex; align-items: center; justify-content: space-between; background: var(--paper); border-bottom: 1px solid var(--line); }
 .admin-header > div { display: flex; align-items: center; gap: 18px; font-size: 11px; }
 .admin-header > div a { font-weight: 700; }
+.link-button { border: 0; padding: 0; background: transparent; color: var(--ink); font-size: 11px; font-weight: 700; cursor: pointer; }
 .admin-hero { padding: 70px 7vw 55px; background: var(--forest); color: white; }
 .admin-hero > p:first-child { color: #df8766; font-size: 9px; letter-spacing: 2.5px; font-weight: 800; }
 .admin-hero h1 { max-width: 850px; margin: 18px 0; font: 500 clamp(35px, 5vw, 62px)/1.25 Georgia, "Noto Serif JP", serif; }
@@ -771,6 +772,19 @@ footer {
 .admin-denied > div { max-width: 520px; background: white; color: var(--ink); padding: 50px; }
 .admin-denied > div > p:first-child { color: var(--copper); letter-spacing: 2px; font-size: 9px; }
 .admin-denied a { display: inline-block; margin: 15px 15px 0 0; font-weight: 700; }
+.admin-login { min-height: 100vh; display: grid; place-items: center; padding: 35px; background: linear-gradient(120deg, var(--forest) 0 55%, #e7dece 55%); }
+.admin-login > section { width: min(100%, 500px); background: white; border: 1px solid var(--line); padding: 46px; box-shadow: 0 28px 80px #08130f44; }
+.admin-login .brand { margin-bottom: 48px; }
+.admin-login h1 { margin: 14px 0; font: 500 44px Georgia, "Noto Serif JP", serif; }
+.admin-login > section > p:not(.kicker) { color: var(--muted); line-height: 1.75; }
+.admin-login form { margin-top: 30px; }
+.admin-login form label { display: block; font-size: 10px; font-weight: 700; }
+.admin-login form input { width: 100%; margin-top: 8px; padding: 14px; border: 1px solid var(--line); font-size: 18px; letter-spacing: 3px; }
+.admin-login form input:focus { outline: 2px solid #bd684955; }
+.admin-login form button { width: 100%; margin-top: 14px; border: 0; padding: 15px; background: var(--forest); color: white; font-weight: 800; cursor: pointer; }
+.admin-login form button:disabled { opacity: .6; cursor: wait; }
+.login-error { margin-top: 12px; padding: 11px; background: #fff0eb; color: #a04432; font-size: 11px; }
+.back-site { display: inline-block; margin-top: 24px; color: var(--muted); font-size: 10px; font-weight: 700; }
 @media (max-width: 950px) {
   .upload-grid, .admin-grid { grid-template-columns: 1fr; }
   .upload-grid article { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -784,4 +798,6 @@ footer {
   .admin-fields { grid-template-columns: 1fr; }
   .admin-list article { grid-template-columns: 45px 1fr; }
   .file-actions { grid-column: 1 / -1; flex-direction: row; }
+  .admin-login { padding: 18px; background: var(--forest); }
+  .admin-login > section { padding: 30px 24px; }
 }

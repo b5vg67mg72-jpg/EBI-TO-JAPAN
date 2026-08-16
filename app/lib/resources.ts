@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "../chatgpt-auth";
+import { requirePasswordAdmin } from "./admin-session";
 
 export type ResourceRow = {
   id: string;
@@ -20,7 +20,6 @@ export type ResourceRow = {
 
 type RuntimeEnv = { DB: D1Database; FILES: R2Bucket };
 const runtime = env as unknown as RuntimeEnv;
-const ADMIN_EMAILS = new Set(["n24jg5scym@privaterelay.appleid.com"]);
 
 export function getResourceBindings() {
   if (!runtime.DB || !runtime.FILES) throw new Error("Resource storage is unavailable.");
@@ -50,16 +49,7 @@ export async function ensureResourceSchema() {
   ]);
 }
 
-export async function requireAdmin() {
-  const user = await getChatGPTUser();
-  if (!user) return { ok: false as const, response: Response.json({ error: "Sign in required" }, { status: 401 }) };
-  if (!ADMIN_EMAILS.has(user.email.toLowerCase())) return { ok: false as const, response: Response.json({ error: "Administrator access required" }, { status: 403 }) };
-  return { ok: true as const, user };
-}
-
-export function isAdminEmail(email: string) {
-  return ADMIN_EMAILS.has(email.toLowerCase());
-}
+export const requireAdmin = requirePasswordAdmin;
 
 export function publicResource(row: ResourceRow) {
   return {

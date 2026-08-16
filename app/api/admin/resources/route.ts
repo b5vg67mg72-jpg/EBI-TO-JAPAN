@@ -8,8 +8,8 @@ function safeFileName(name: string) {
   return name.normalize("NFKC").replace(/[^\p{L}\p{N}._-]+/gu, "-").replace(/-+/g, "-").slice(-120) || "resource";
 }
 
-export async function GET() {
-  const auth = await requireAdmin(); if (!auth.ok) return auth.response;
+export async function GET(request: Request) {
+  const auth = await requireAdmin(request); if (!auth.ok) return auth.response;
   await ensureResourceSchema();
   const { DB } = getResourceBindings();
   const result = await DB.prepare("SELECT * FROM resources ORDER BY created_at DESC LIMIT 100").all<ResourceRow>();
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin(); if (!auth.ok) return auth.response;
+  const auth = await requireAdmin(request); if (!auth.ok) return auth.response;
   await ensureResourceSchema();
   const form = await request.formData();
   const file = form.get("file");
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   await FILES.put(fileKey, file.stream(), { httpMetadata: { contentType }, customMetadata: { originalName: file.name } });
   try {
     await DB.prepare(`INSERT INTO resources (id, title, description, category, language, access_level, status, file_key, file_name, content_type, size_bytes, uploaded_by, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(id, title, description, category, language, accessLevel, status, fileKey, file.name, contentType, file.size, auth.user.email, now, now).run();
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(id, title, description, category, language, accessLevel, status, fileKey, file.name, contentType, file.size, "password-admin", now, now).run();
   } catch (error) {
     await FILES.delete(fileKey);
     throw error;
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const auth = await requireAdmin(); if (!auth.ok) return auth.response;
+  const auth = await requireAdmin(request); if (!auth.ok) return auth.response;
   await ensureResourceSchema();
   const body = await request.json() as { id?: string; status?: string; accessLevel?: string };
   if (!body.id) return Response.json({ error: "Missing resource id" }, { status: 400 });
@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const auth = await requireAdmin(); if (!auth.ok) return auth.response;
+  const auth = await requireAdmin(request); if (!auth.ok) return auth.response;
   await ensureResourceSchema();
   const body = await request.json() as { id?: string };
   if (!body.id) return Response.json({ error: "Missing resource id" }, { status: 400 });
