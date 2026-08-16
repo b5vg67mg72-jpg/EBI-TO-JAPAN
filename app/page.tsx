@@ -3,6 +3,15 @@
 import { useMemo, useState } from "react";
 
 type Lang = "ja" | "en" | "zh";
+type AnalysisResult = {
+  label: string;
+  score: number;
+  level: string;
+  reason: string;
+  metrics: { label: string; value: number; positive?: boolean }[];
+  flags: string[];
+  suggestions: string[];
+};
 
 const copy = {
   ja: {
@@ -28,6 +37,10 @@ const copy = {
     aiLabel: "AI作成の可能性", simLabel: "文章の類似度", low: "低い", mid: "中程度", high: "高い",
     aiReason: "文章の均一さ、定型表現、具体的な経験の量から推定しました。", simReason: "文章内の長い表現と、貼り付けた参考文章を比較しました。",
     disclaimer: "結果は参考情報です。AI作成や盗用を断定するものではなく、インターネット全体を検索する全庫型判定ではありません。",
+    chars: "文字", clear: "入力をクリア", signals: "検出したポイント", suggestions: "改善のヒント", noSignals: "目立つ問題は見つかりませんでした。",
+    metricNames: ["文体の均一さ", "定型表現リスク", "具体性", "文章内の反復", "参考文との一致"],
+    flagTexts: ["文の長さとリズムが非常に均一です。", "よく使われる定型表現が複数あります。", "固有の経験・数字・授業名が少なめです。", "同じ長い表現が文章内で繰り返されています。", "参考文と共通する長い表現があります。"],
+    advice: ["自分だけの出来事を、状況・行動・結果の順で具体的に書きましょう。", "大学名だけでなく、授業・ゼミ・教授・制度と目標のつながりを説明しましょう。", "同じ長さの文が続く部分を見直し、短文と長文にリズムをつけましょう。", "定型表現を、自分が実際に感じた言葉へ置き換えましょう。", "参考文と似た箇所は引用せず、自分の経験から書き直しましょう。"],
     services: "学習と進学を、一つの流れで支える。", serviceCards: [["EJU月額講座", "精聴・精読、学習計画、質問対応"], ["マンツーマン指導", "苦手科目と大学独自試験の準備"], ["大学受験総合プラン", "大学選び、出願書類、志望理由書、面接"]],
     contactTitle: "日本への一歩、ここから。", contactBody: "まだ何も決まっていなくても大丈夫。まずは、あなたの話を聞かせてください。", name: "お名前", email: "メールアドレス", message: "相談したい内容", send: "無料相談を予約する",
   },
@@ -45,6 +58,10 @@ const copy = {
     aiKicker: "ADMISSIONS LAB", aiTitle: "Statement AI & Similarity Check", aiBody: "Estimate AI-written likelihood, internal repetition, and similarity to a reference text.",
     statement: "Statement to check", statementPh: "Paste your statement here", reference: "Reference text (optional)", referencePh: "Paste a template or reference text", aiBtn: "Check AI likelihood", simBtn: "Check similarity", empty: "Enter a statement first.",
     aiLabel: "AI-written likelihood", simLabel: "Text similarity", low: "Low", mid: "Moderate", high: "High", aiReason: "Estimated from writing consistency, formulaic phrasing, and the amount of specific personal detail.", simReason: "Compared long phrases within the statement and against the reference text you supplied.", disclaimer: "This is a reference signal, not proof of AI use or plagiarism, and it does not search the entire internet.",
+    chars: "characters", clear: "Clear text", signals: "Signals found", suggestions: "How to improve", noSignals: "No prominent issues were found.",
+    metricNames: ["Style uniformity", "Formulaic-language risk", "Specific detail", "Internal repetition", "Reference overlap"],
+    flagTexts: ["Sentence lengths and rhythm are unusually uniform.", "Several common template phrases appear in the text.", "There are few personal events, numbers, class names, or other concrete details.", "Long phrases repeat within the statement.", "Long phrases overlap with the supplied reference."],
+    advice: ["Describe one personal event through its situation, your action, and the result.", "Connect specific classes, seminars, faculty, or programs to your goal—not only the university name.", "Vary the rhythm by reviewing sections where sentences have nearly identical lengths.", "Replace template phrases with words that reflect what you actually experienced.", "Rewrite overlapping passages from your own experience instead of borrowing the reference wording."],
     services: "Learning and admissions support in one clear path.", serviceCards: [["Monthly EJU Course", "Listening, reading, planning, and Q&A"], ["One-to-one Tutoring", "Weak subjects and university-specific exams"], ["Complete Admissions Plan", "University choice, documents, statement, and interview"]],
     contactTitle: "Your first step toward Japan starts here.", contactBody: "It is okay if nothing is decided yet. Tell us where you are and what you need.", name: "Name", email: "Email", message: "How can we help?", send: "Book a free consultation",
   },
@@ -59,6 +76,10 @@ const copy = {
     aiKicker: "升学工具", aiTitle: "志望理由书 AI判定・查重", aiBody: "检查AI生成可能性、文章内部重复，并与粘贴的参考文章比较相似度。",
     statement: "需要检查的志望理由书", statementPh: "请粘贴志望理由书", reference: "参考文章（选填）", referencePh: "请粘贴模板或参考文章", aiBtn: "检测AI生成可能性", simBtn: "AI查重", empty: "请先输入志望理由书。",
     aiLabel: "AI生成的可能性", simLabel: "文章相似度", low: "较低", mid: "中等", high: "较高", aiReason: "根据行文一致性、模板表达和具体个人经历的数量估算。", simReason: "比较文章内部的长表达，并与您提供的参考文章进行对比。", disclaimer: "结果仅供参考，不能证明AI生成或抄袭，也不会搜索整个互联网。",
+    chars: "字", clear: "清空内容", signals: "检测到的问题", suggestions: "修改建议", noSignals: "没有发现明显问题。",
+    metricNames: ["文风一致性", "模板化表达风险", "个人细节强度", "文内重复", "参考文重合"],
+    flagTexts: ["句子长度和行文节奏过于均匀。", "文章中出现了多个常见模板表达。", "个人经历、数字、课程名等具体细节较少。", "文章内部存在重复的长表达。", "部分长表达与参考文章重合。"],
+    advice: ["加入只有你本人才能写出的经历，并按情况、行动、结果展开。", "不要只写大学名称，要说明具体课程、研究室、教授或制度与目标的关系。", "检查长度相近的连续句子，适当搭配长句和短句。", "把模板化表达改成你真实体验后的语言。", "不要照搬参考文，请从自己的经历重新组织相似段落。"],
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
     contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询",
   },
@@ -66,36 +87,49 @@ const copy = {
 
 function normalizeText(value: string) { return value.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, ""); }
 function shingles(value: string, size = 9) { const clean = normalizeText(value); return Array.from({ length: Math.max(0, clean.length - size + 1) }, (_, i) => clean.slice(i, i + size)); }
+function clamp(value: number) { return Math.max(0, Math.min(100, Math.round(value))); }
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("ja");
   const [statement, setStatement] = useState("");
   const [reference, setReference] = useState("");
-  const [result, setResult] = useState<{ label: string; score: number; level: string; reason: string } | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
   const t = copy[lang];
   const level = (score: number) => score >= 60 ? t.high : score >= 28 ? t.mid : t.low;
 
   function checkAI() {
-    if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, reason: t.empty });
+    if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, reason: t.empty, metrics: [], flags: [], suggestions: [] });
     const sentences = statement.split(/[。！？!?\.]+/).filter(Boolean);
     const lengths = sentences.map(s => s.trim().length);
     const avg = lengths.reduce((a, b) => a + b, 0) / Math.max(1, lengths.length);
     const variation = avg ? Math.sqrt(lengths.reduce((a, b) => a + (b - avg) ** 2, 0) / Math.max(1, lengths.length)) / avg : 0;
-    const generic = (statement.match(/昔から|魅力を感じ|将来は|从小就|一直以来|贵校|I have always|make a contribution/gi) || []).length;
-    const details = (statement.match(/[0-9０-９]|教授|ゼミ|授業|研究|project|professor|课程|项目|实习/g) || []).length;
-    const score = Math.max(5, Math.min(95, Math.round(45 + (variation < .3 ? 22 : -8) + generic * 7 - details * 4)));
-    setResult({ label: t.aiLabel, score, level: level(score), reason: t.aiReason });
+    const generic = (statement.match(/昔から|魅力を感じ|将来は|貢献したい|从小就|一直以来|贵校|为社会做贡献|I have always|make a contribution|passionate about/gi) || []).length;
+    const details = (statement.match(/[0-9０-９]|教授|ゼミ|授業|研究|大会|アルバイト|project|professor|course|internship|课程|项目|实习|比赛/g) || []).length;
+    const sentenceUniformity = clamp((1 - Math.min(variation, .75) / .75) * 100);
+    const formulaRisk = clamp(generic * 22);
+    const detailStrength = clamp(details * 14 + Math.min(statement.length / 12, 25));
+    const source = shingles(statement); const repeated = source.length ? 1 - new Set(source).size / source.length : 0;
+    const repetitionRisk = clamp(repeated * 180);
+    const score = clamp(18 + sentenceUniformity * .35 + formulaRisk * .28 + repetitionRisk * .18 - detailStrength * .25);
+    const flags = [sentenceUniformity > 72 ? t.flagTexts[0] : "", formulaRisk > 30 ? t.flagTexts[1] : "", detailStrength < 35 ? t.flagTexts[2] : "", repetitionRisk > 24 ? t.flagTexts[3] : ""].filter(Boolean);
+    const suggestions = [detailStrength < 55 ? t.advice[0] : "", detailStrength < 45 ? t.advice[1] : "", sentenceUniformity > 72 ? t.advice[2] : "", formulaRisk > 30 ? t.advice[3] : ""].filter(Boolean).slice(0, 3);
+    setResult({ label: t.aiLabel, score, level: level(score), reason: t.aiReason, metrics: [{ label: t.metricNames[0], value: sentenceUniformity }, { label: t.metricNames[1], value: formulaRisk }, { label: t.metricNames[2], value: detailStrength, positive: true }, { label: t.metricNames[3], value: repetitionRisk }], flags, suggestions });
   }
 
   function checkSimilarity() {
-    if (!statement.trim()) return setResult({ label: t.simLabel, score: 0, level: t.low, reason: t.empty });
+    if (!statement.trim()) return setResult({ label: t.simLabel, score: 0, level: t.low, reason: t.empty, metrics: [], flags: [], suggestions: [] });
     const source = shingles(statement); const unique = new Set(source);
     const repeated = source.length ? 1 - unique.size / source.length : 0;
-    let score = Math.round(repeated * 100);
-    if (reference.trim()) { const other = new Set(shingles(reference)); const matches = [...unique].filter(x => other.has(x)).length; score = Math.round(matches / Math.max(1, Math.min(unique.size, other.size)) * 100); }
-    score = Math.max(0, Math.min(100, score));
-    setResult({ label: t.simLabel, score, level: level(score), reason: t.simReason });
+    const internalScore = clamp(repeated * 180);
+    let referenceScore = 0;
+    if (reference.trim()) { const other = new Set(shingles(reference)); const matches = [...unique].filter(x => other.has(x)).length; referenceScore = clamp(matches / Math.max(1, Math.min(unique.size, other.size)) * 100); }
+    const score = reference.trim() ? referenceScore : internalScore;
+    const flags = [internalScore > 24 ? t.flagTexts[3] : "", referenceScore > 18 ? t.flagTexts[4] : ""].filter(Boolean);
+    const suggestions = [internalScore > 24 ? t.advice[3] : "", referenceScore > 18 ? t.advice[4] : ""].filter(Boolean);
+    setResult({ label: t.simLabel, score, level: level(score), reason: t.simReason, metrics: [{ label: t.metricNames[3], value: internalScore }, { label: t.metricNames[4], value: referenceScore }], flags, suggestions });
   }
+
+  function clearTool() { setStatement(""); setReference(""); setResult(null); }
 
   const cards = useMemo(() => t.cards, [t]);
 
@@ -108,7 +142,7 @@ export default function Home() {
 
     <section className="dark section" id="data"><div className="section-head"><div><p className="kicker">{t.dataKicker}</p><h2>{t.dataA}<em>{t.dataB}</em></h2></div><p>{t.dataBody}</p></div><div className="metrics"><div><b>132+</b><span>UNIVERSITIES</span></div><div><b>148+</b><span>PROGRAMS</span></div><div><b>2026</b><span>DATA VERSION</span></div></div><div className="data-grid"><article><small>PUBLIC</small><h3>{t.publicTitle}</h3><ul>{t.publicItems.map(x => <li key={x}>✓ {x}</li>)}</ul></article><article className="member"><small>CLASS MEMBERS</small><h3>{t.memberTitle}</h3><ul>{t.memberItems.map(x => <li key={x}>◇ {x}</li>)}</ul><a href="#contact" className="button">{t.consult} ↗</a></article></div></section>
 
-    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="tool"><div className="tool-form"><label>{t.statement}<textarea value={statement} onChange={e => setStatement(e.target.value)} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => setReference(e.target.value)} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button></div></div><div className="tool-result">{result ? <><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><p>{result.reason}</p><small>{t.disclaimer}</small></> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p></div>}</div></div></section>
+    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p></div>}</div></div></section>
 
     <section className="paper section services"><div className="section-head"><h2>{t.services}</h2></div><div className="service-grid">{t.serviceCards.map((x, i) => <article key={x[0]}><span>0{i + 1}</span><h3>{x[0]}</h3><p>{x[1]}</p><a href="#contact">{t.consult} →</a></article>)}</div></section>
 
