@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Lang = "ja" | "en" | "zh";
 type AnalysisResult = {
@@ -12,6 +12,7 @@ type AnalysisResult = {
   flags: string[];
   suggestions: string[];
 };
+type UploadedResource = { id: string; title: string; description: string; category: string; language: string; accessLevel: "public" | "group"; fileName: string; contentType: string; sizeBytes: number; downloadUrl: string | null };
 
 const copy = {
   ja: {
@@ -41,6 +42,7 @@ const copy = {
     metricNames: ["文体の均一さ", "定型表現リスク", "具体性", "文章内の反復", "参考文との一致"],
     flagTexts: ["文の長さとリズムが非常に均一です。", "よく使われる定型表現が複数あります。", "固有の経験・数字・授業名が少なめです。", "同じ長い表現が文章内で繰り返されています。", "参考文と共通する長い表現があります。"],
     advice: ["自分だけの出来事を、状況・行動・結果の順で具体的に書きましょう。", "大学名だけでなく、授業・ゼミ・教授・制度と目標のつながりを説明しましょう。", "同じ長さの文が続く部分を見直し、短文と長文にリズムをつけましょう。", "定型表現を、自分が実際に感じた言葉へ置き換えましょう。", "参考文と似た箇所は引用せず、自分の経験から書き直しましょう。"],
+    uploadKicker: "NEW RESOURCES", uploadTitle: "最新の学習資料", uploadLead: "管理者が追加した教材は、公開後すぐにここへ表示されます。", download: "ダウンロード", groupOnly: "学習グループで受け取る", noUploads: "新しい公開資料は準備中です。", admin: "管理者ログイン",
     services: "学習と進学を、一つの流れで支える。", serviceCards: [["EJU月額講座", "精聴・精読、学習計画、質問対応"], ["マンツーマン指導", "苦手科目と大学独自試験の準備"], ["大学受験総合プラン", "大学選び、出願書類、志望理由書、面接"]],
     contactTitle: "日本への一歩、ここから。", contactBody: "まだ何も決まっていなくても大丈夫。まずは、あなたの話を聞かせてください。", name: "お名前", email: "メールアドレス", message: "相談したい内容", send: "無料相談を予約する",
   },
@@ -62,6 +64,7 @@ const copy = {
     metricNames: ["Style uniformity", "Formulaic-language risk", "Specific detail", "Internal repetition", "Reference overlap"],
     flagTexts: ["Sentence lengths and rhythm are unusually uniform.", "Several common template phrases appear in the text.", "There are few personal events, numbers, class names, or other concrete details.", "Long phrases repeat within the statement.", "Long phrases overlap with the supplied reference."],
     advice: ["Describe one personal event through its situation, your action, and the result.", "Connect specific classes, seminars, faculty, or programs to your goal—not only the university name.", "Vary the rhythm by reviewing sections where sentences have nearly identical lengths.", "Replace template phrases with words that reflect what you actually experienced.", "Rewrite overlapping passages from your own experience instead of borrowing the reference wording."],
+    uploadKicker: "NEW RESOURCES", uploadTitle: "Latest study materials", uploadLead: "Materials added by the administrator appear here as soon as they are published.", download: "Download", groupOnly: "Get it in the study group", noUploads: "New public resources are being prepared.", admin: "Administrator login",
     services: "Learning and admissions support in one clear path.", serviceCards: [["Monthly EJU Course", "Listening, reading, planning, and Q&A"], ["One-to-one Tutoring", "Weak subjects and university-specific exams"], ["Complete Admissions Plan", "University choice, documents, statement, and interview"]],
     contactTitle: "Your first step toward Japan starts here.", contactBody: "It is okay if nothing is decided yet. Tell us where you are and what you need.", name: "Name", email: "Email", message: "How can we help?", send: "Book a free consultation",
   },
@@ -80,6 +83,7 @@ const copy = {
     metricNames: ["文风一致性", "模板化表达风险", "个人细节强度", "文内重复", "参考文重合"],
     flagTexts: ["句子长度和行文节奏过于均匀。", "文章中出现了多个常见模板表达。", "个人经历、数字、课程名等具体细节较少。", "文章内部存在重复的长表达。", "部分长表达与参考文章重合。"],
     advice: ["加入只有你本人才能写出的经历，并按情况、行动、结果展开。", "不要只写大学名称，要说明具体课程、研究室、教授或制度与目标的关系。", "检查长度相近的连续句子，适当搭配长句和短句。", "把模板化表达改成你真实体验后的语言。", "不要照搬参考文，请从自己的经历重新组织相似段落。"],
+    uploadKicker: "最新资料", uploadTitle: "最新学习资料", uploadLead: "管理员上传并发布后，资料会立即显示在这里，不需要重新部署网站。", download: "下载资料", groupOnly: "加入学习群获取", noUploads: "新的公开资料正在准备中。", admin: "管理员登录",
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
     contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询",
   },
@@ -94,8 +98,13 @@ export default function Home() {
   const [statement, setStatement] = useState("");
   const [reference, setReference] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [uploads, setUploads] = useState<UploadedResource[]>([]);
   const t = copy[lang];
   const level = (score: number) => score >= 60 ? t.high : score >= 28 ? t.mid : t.low;
+
+  useEffect(() => {
+    fetch("/api/resources").then(response => response.ok ? response.json() : { resources: [] }).then((data: { resources?: UploadedResource[] }) => setUploads(data.resources || [])).catch(() => setUploads([]));
+  }, []);
 
   function checkAI() {
     if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, reason: t.empty, metrics: [], flags: [], suggestions: [] });
@@ -144,9 +153,11 @@ export default function Home() {
 
     <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p></div>}</div></div></section>
 
+    <section className="uploads section" id="downloads"><div className="section-head"><div><p className="kicker">{t.uploadKicker}</p><h2>{t.uploadTitle}</h2></div><p>{t.uploadLead}</p></div>{uploads.length ? <div className="upload-grid">{uploads.map(item => <article key={item.id}><div className="upload-type">{item.fileName.split(".").pop()?.toUpperCase()}</div><small>{item.category} · {(item.sizeBytes / 1024 / 1024).toFixed(1)} MB</small><h3>{item.title}</h3><p>{item.description || item.fileName}</p>{item.downloadUrl ? <a className="button" href={item.downloadUrl}>{t.download} ↓</a> : <a className="button copper" href="#contact">{t.groupOnly} ↗</a>}</article>)}</div> : <div className="upload-empty">{t.noUploads}</div>}</section>
+
     <section className="paper section services"><div className="section-head"><h2>{t.services}</h2></div><div className="service-grid">{t.serviceCards.map((x, i) => <article key={x[0]}><span>0{i + 1}</span><h3>{x[0]}</h3><p>{x[1]}</p><a href="#contact">{t.consult} →</a></article>)}</div></section>
 
     <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={e => e.preventDefault()}><label>{t.name}<input required/></label><label>{t.email}<input type="email" required/></label><label>{t.message}<textarea/></label><button className="button">{t.send} ↗</button></form></section>
-    <footer><div className="brand"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN</span></footer>
+    <footer><div className="brand"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN · <a href="/admin">{t.admin}</a></span></footer>
   </main>;
 }

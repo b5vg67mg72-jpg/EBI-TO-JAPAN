@@ -1,0 +1,1 @@
+CREATE INDEX `idx_resources_status_created` ON `resources` (`status`,`created_at`);

@@ -716,3 +716,72 @@ footer {
     grid-template-columns: 115px 1fr 34px;
   }
 }
+
+/* Published resource library */
+.uploads { background: #f7f2e9; }
+.upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); }
+.upload-grid article { padding: 32px; background: white; border-right: 1px solid var(--line); }
+.upload-grid article:last-child { border-right: 0; }
+.upload-type { width: 50px; height: 50px; display: grid; place-items: center; background: var(--forest); color: white; font-size: 10px; font-weight: 800; margin-bottom: 24px; }
+.upload-grid small { color: var(--copper); font-size: 9px; letter-spacing: 1px; }
+.upload-grid h3 { font: 700 23px/1.35 Georgia, "Noto Serif JP", serif; margin: 12px 0; }
+.upload-grid p { color: var(--muted); line-height: 1.7; min-height: 54px; }
+.button.copper { background: var(--copper); }
+.upload-empty { border: 1px dashed var(--line); padding: 60px; text-align: center; color: var(--muted); background: #ffffff88; }
+
+/* Administrator mode */
+.admin-shell { min-height: 100vh; background: #eee8dc; }
+.admin-header { min-height: 82px; padding: 15px 5vw; display: flex; align-items: center; justify-content: space-between; background: var(--paper); border-bottom: 1px solid var(--line); }
+.admin-header > div { display: flex; align-items: center; gap: 18px; font-size: 11px; }
+.admin-header > div a { font-weight: 700; }
+.admin-hero { padding: 70px 7vw 55px; background: var(--forest); color: white; }
+.admin-hero > p:first-child { color: #df8766; font-size: 9px; letter-spacing: 2.5px; font-weight: 800; }
+.admin-hero h1 { max-width: 850px; margin: 18px 0; font: 500 clamp(35px, 5vw, 62px)/1.25 Georgia, "Noto Serif JP", serif; }
+.admin-hero > p:last-child { max-width: 720px; color: #b8c5c0; line-height: 1.8; }
+.admin-grid { padding: 45px 7vw 90px; display: grid; grid-template-columns: minmax(330px, .75fr) minmax(480px, 1.25fr); gap: 28px; align-items: start; }
+.upload-card, .library-card { background: white; border: 1px solid var(--line); padding: 34px; }
+.admin-title { display: flex; gap: 15px; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 25px; }
+.admin-title > span { color: var(--copper); font-size: 11px; }
+.admin-title h2 { margin: 0; font: 700 27px Georgia, "Noto Serif JP", serif; }
+.admin-title p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+.upload-card label { display: block; margin-bottom: 16px; font-size: 10px; font-weight: 700; }
+.upload-card input, .upload-card textarea, .upload-card select { display: block; width: 100%; margin-top: 7px; padding: 12px; border: 1px solid var(--line); background: white; }
+.upload-card textarea { min-height: 80px; resize: vertical; }
+.admin-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.file-drop { padding: 20px; background: #f7f3eb; border: 1px dashed #baaF9e; }
+.file-drop input { padding: 0; border: 0; }
+.file-drop span { display: block; margin-top: 10px; color: var(--muted); font-weight: 400; }
+.upload-card > button { width: 100%; border: 0; padding: 15px; background: var(--forest); color: white; font-weight: 800; cursor: pointer; }
+.upload-card > button:disabled, .file-actions button:disabled { opacity: .5; cursor: wait; }
+.admin-message { padding: 12px; background: #f1ede5; color: var(--forest); font-size: 11px; line-height: 1.5; }
+.admin-list article { display: grid; grid-template-columns: 54px 1fr auto; gap: 16px; padding: 19px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.admin-list article:last-child { border-bottom: 0; }
+.file-badge { width: 48px; height: 48px; display: grid; place-items: center; background: #e9dfce; color: var(--forest); font-size: 9px; font-weight: 800; }
+.file-info small { color: var(--copper); font-size: 9px; }
+.file-info h3 { margin: 5px 0; font-size: 15px; }
+.file-info p { margin: 0 0 7px; color: var(--muted); font-size: 9px; overflow-wrap: anywhere; }
+.file-info > div { display: flex; gap: 8px; }
+.file-info > div span { border: 1px solid var(--line); padding: 3px 7px; font-size: 8px; }
+.file-info > div span.published { background: #dce9df; border-color: #adc6b4; }
+.file-actions { display: flex; flex-direction: column; gap: 5px; }
+.file-actions button { border: 1px solid var(--line); background: white; padding: 7px 10px; font-size: 9px; cursor: pointer; }
+.file-actions button.danger { color: #a04432; }
+.empty-library { padding: 60px 10px; text-align: center; color: var(--muted); }
+.admin-denied { min-height: 100vh; display: grid; place-items: center; background: var(--forest); color: white; padding: 30px; }
+.admin-denied > div { max-width: 520px; background: white; color: var(--ink); padding: 50px; }
+.admin-denied > div > p:first-child { color: var(--copper); letter-spacing: 2px; font-size: 9px; }
+.admin-denied a { display: inline-block; margin: 15px 15px 0 0; font-weight: 700; }
+@media (max-width: 950px) {
+  .upload-grid, .admin-grid { grid-template-columns: 1fr; }
+  .upload-grid article { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 560px) {
+  .admin-header { align-items: flex-start; gap: 15px; }
+  .admin-header > div { flex-direction: column; align-items: flex-end; gap: 7px; }
+  .admin-hero { padding: 50px 5vw 40px; }
+  .admin-grid { padding: 25px 5vw 60px; }
+  .upload-card, .library-card { padding: 22px; }
+  .admin-fields { grid-template-columns: 1fr; }
+  .admin-list article { grid-template-columns: 45px 1fr; }
+  .file-actions { grid-column: 1 / -1; flex-direction: row; }
+}
