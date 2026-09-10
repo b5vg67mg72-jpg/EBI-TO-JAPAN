@@ -12,11 +12,11 @@ type AnalysisResult = {
   flags: string[];
   suggestions: string[];
 };
-type UploadedResource = { id: string; title: string; description: string; category: string; language: string; accessLevel: "public" | "group"; fileName: string; contentType: string; sizeBytes: number; downloadUrl: string | null };
+type UploadedResource = { id: string; title: string; description: string; category: string; language: string; accessLevel: "public" | "group" | "paid"; resourceKind: "study" | "exam"; schoolName: string; faculty: string; examYear: string; subject: string; priceYen: number; purchaseUrl: string | null; previewUrl: string | null; fileName: string; contentType: string; sizeBytes: number; downloadUrl: string | null };
 
 const copy = {
   ja: {
-    nav: ["EJU対策", "録画授業", "英語対策", "大学情報", "AIツール"], consult: "無料相談",
+    nav: ["EJU対策", "録画授業", "英語対策", "校内考過去問", "大学情報", "AIツール"], consult: "無料相談",
     eyebrow: "EBI STUDY RESOURCE LIBRARY", heroA: "日本留学の勉強を、", heroB: "ここから始めよう。",
     lead: "EJU対策、録画授業、英語試験の準備をひとつの場所に。今の目標に必要な教材へ、すぐに進めます。",
     free: "無料EJU動画を見る", proof: ["分野別に整理", "スマホ対応", "継続更新"],
@@ -43,11 +43,12 @@ const copy = {
     flagTexts: ["文の長さとリズムが非常に均一です。", "よく使われる定型表現が複数あります。", "固有の経験・数字・授業名が少なめです。", "同じ長い表現が文章内で繰り返されています。", "参考文と共通する長い表現があります。"],
     advice: ["自分だけの出来事を、状況・行動・結果の順で具体的に書きましょう。", "大学名だけでなく、授業・ゼミ・教授・制度と目標のつながりを説明しましょう。", "同じ長さの文が続く部分を見直し、短文と長文にリズムをつけましょう。", "定型表現を、自分が実際に感じた言葉へ置き換えましょう。", "参考文と似た箇所は引用せず、自分の経験から書き直しましょう。"],
     uploadKicker: "NEW RESOURCES", uploadTitle: "最新の学習資料", uploadLead: "管理者が追加した教材は、公開後すぐにここへ表示されます。", download: "ダウンロード", groupOnly: "学習グループで受け取る", noUploads: "新しい公開資料は準備中です。", admin: "管理者ログイン",
+    examKicker: "PAST EXAM SHOP", examTitle: "大学別・校内考の過去問", examLead: "大学・学部・年度・科目から必要な過去問を選べます。購入前に商品情報とサンプルをご確認ください。", examEmpty: "校内考の過去問商品は準備中です。", preview: "サンプルを見る", buy: "購入する", inquire: "購入について問い合わせる", yen: "円", protected: "購入後に完全版をご案内します。",
     services: "学習と進学を、一つの流れで支える。", serviceCards: [["EJU月額講座", "精聴・精読、学習計画、質問対応"], ["マンツーマン指導", "苦手科目と大学独自試験の準備"], ["大学受験総合プラン", "大学選び、出願書類、志望理由書、面接"]],
     contactTitle: "日本への一歩、ここから。", contactBody: "まだ何も決まっていなくても大丈夫。まずは、あなたの話を聞かせてください。", name: "お名前", email: "メールアドレス", message: "相談したい内容", send: "無料相談を予約する",
   },
   en: {
-    nav: ["EJU Resources", "Recorded Classes", "English Prep", "University Data", "AI Tools"], consult: "Free consultation",
+    nav: ["EJU Resources", "Recorded Classes", "English Prep", "Past Exams", "University Data", "AI Tools"], consult: "Free consultation",
     eyebrow: "EBI STUDY RESOURCE LIBRARY", heroA: "Prepare for study in Japan,", heroB: "all in one place.",
     lead: "EJU resources, recorded classes, and English-test preparation in one clear library. Go straight to what you need next.",
     free: "Watch the free EJU lesson", proof: ["Organized by subject", "Mobile friendly", "Continuously updated"],
@@ -65,11 +66,12 @@ const copy = {
     flagTexts: ["Sentence lengths and rhythm are unusually uniform.", "Several common template phrases appear in the text.", "There are few personal events, numbers, class names, or other concrete details.", "Long phrases repeat within the statement.", "Long phrases overlap with the supplied reference."],
     advice: ["Describe one personal event through its situation, your action, and the result.", "Connect specific classes, seminars, faculty, or programs to your goal—not only the university name.", "Vary the rhythm by reviewing sections where sentences have nearly identical lengths.", "Replace template phrases with words that reflect what you actually experienced.", "Rewrite overlapping passages from your own experience instead of borrowing the reference wording."],
     uploadKicker: "NEW RESOURCES", uploadTitle: "Latest study materials", uploadLead: "Materials added by the administrator appear here as soon as they are published.", download: "Download", groupOnly: "Get it in the study group", noUploads: "New public resources are being prepared.", admin: "Administrator login",
+    examKicker: "PAST EXAM SHOP", examTitle: "University entrance past exams", examLead: "Browse by university, faculty, year, and subject. Review the item details and sample before purchasing.", examEmpty: "Past-exam products are being prepared.", preview: "View sample", buy: "Buy now", inquire: "Ask to purchase", yen: "JPY", protected: "The complete file is provided after purchase.",
     services: "Learning and admissions support in one clear path.", serviceCards: [["Monthly EJU Course", "Listening, reading, planning, and Q&A"], ["One-to-one Tutoring", "Weak subjects and university-specific exams"], ["Complete Admissions Plan", "University choice, documents, statement, and interview"]],
     contactTitle: "Your first step toward Japan starts here.", contactBody: "It is okay if nothing is decided yet. Tell us where you are and what you need.", name: "Name", email: "Email", message: "How can we help?", send: "Book a free consultation",
   },
   zh: {
-    nav: ["EJU资料", "录播课程", "英语备考", "大学信息", "AI工具"], consult: "免费咨询",
+    nav: ["EJU资料", "录播课程", "英语备考", "校内考真题", "大学信息", "AI工具"], consult: "免费咨询",
     eyebrow: "EBI 日本留学学习资料库", heroA: "日本留学备考，", heroB: "从这里开始。", lead: "EJU资料、录播课程与英语考试准备，都集中在一个清晰的网站中。根据目标，快速找到需要的内容。",
     free: "观看免费EJU课程", proof: ["按科目整理", "手机适配", "持续更新"], areas: "三大学习专区。", areaLead: "按照考试资料、录播课程、英语备考的顺序整理，让下一步一目了然。",
     cards: [["01", "EJU资料", "免费视频、日语、文综、数学、理科", "查看科目资料"], ["02", "录播课程", "从基础到练习，可反复观看", "查看全部课程"], ["03", "英语备考", "TOEFL、TOEIC与大学要求", "查看英语备考"]],
@@ -84,6 +86,7 @@ const copy = {
     flagTexts: ["句子长度和行文节奏过于均匀。", "文章中出现了多个常见模板表达。", "个人经历、数字、课程名等具体细节较少。", "文章内部存在重复的长表达。", "部分长表达与参考文章重合。"],
     advice: ["加入只有你本人才能写出的经历，并按情况、行动、结果展开。", "不要只写大学名称，要说明具体课程、研究室、教授或制度与目标的关系。", "检查长度相近的连续句子，适当搭配长句和短句。", "把模板化表达改成你真实体验后的语言。", "不要照搬参考文，请从自己的经历重新组织相似段落。"],
     uploadKicker: "最新资料", uploadTitle: "最新学习资料", uploadLead: "管理员上传并发布后，资料会立即显示在这里，不需要重新部署网站。", download: "下载资料", groupOnly: "加入学习群获取", noUploads: "新的公开资料正在准备中。", admin: "管理员登录",
+    examKicker: "校内考真题商城", examTitle: "大学校内考往年真题", examLead: "可按大学、学部、年度和科目查看真题。购买前请确认商品信息，并可先查看试看文件。", examEmpty: "校内考真题商品正在准备中。", preview: "查看试看", buy: "立即购买", inquire: "咨询购买", yen: "日元", protected: "购买后获取完整真题文件。",
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
     contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询",
   },
@@ -99,6 +102,7 @@ export default function Home() {
   const [reference, setReference] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [uploads, setUploads] = useState<UploadedResource[]>([]);
+  const [contactMessage, setContactMessage] = useState("");
   const t = copy[lang];
   const level = (score: number) => score >= 60 ? t.high : score >= 28 ? t.mid : t.low;
 
@@ -141,23 +145,33 @@ export default function Home() {
   function clearTool() { setStatement(""); setReference(""); setResult(null); }
 
   const cards = useMemo(() => t.cards, [t]);
+  const exams = uploads.filter(item => item.resourceKind === "exam");
+  const studyUploads = uploads.filter(item => item.resourceKind !== "exam");
+
+  function inquireAbout(item: UploadedResource) {
+    const message = lang === "ja" ? `「${item.title}」（${item.schoolName}・${item.examYear}・${item.subject}）の購入を希望します。` : lang === "en" ? `I would like to purchase “${item.title}” (${item.schoolName}, ${item.examYear}, ${item.subject}).` : `我想购买《${item.title}》（${item.schoolName}・${item.examYear}・${item.subject}）。`;
+    setContactMessage(message);
+    requestAnimationFrame(() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }));
+  }
 
   return <main>
-    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => setLang(e.target.value as Lang)}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
+    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => setLang(e.target.value as Lang)}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
 
     <section className="hero" id="top"><div><p className="kicker">{t.eyebrow}</p><h1>{t.heroA}<em>{t.heroB}</em></h1><p className="lead">{t.lead}</p><a className="button" href="#free">{t.free} ↓</a><div className="proof">{t.proof.map(x => <span key={x}>✓ {x}</span>)}</div></div><div className="hero-stack">{cards.map(card => <a href="#resources" key={card[0]}><span>{card[0]}</span><div><small>EBI RESOURCE</small><h2>{card[1]}</h2><p>{card[2]}</p></div><b>→</b></a>)}</div></section>
 
     <section className="paper section" id="resources"><div className="section-head"><h2>{t.areas}</h2><p>{t.areaLead}</p></div><article className="free-card" id="free"><div className="free-art"><small>FREE LESSON</small><strong>聴<br/>読</strong><img src="/ebi-icon.png" alt=""/></div><div className="free-copy"><span>FREE EJU RESOURCE</span><h2>{t.freeTitle}</h2><p>{t.freeBody}</p><ul>{t.freeList.map(x => <li key={x}>✓ {x}</li>)}</ul><div><button className="button">{t.free} ▶</button><a href="#contact">{t.join} ↗</a></div></div></article><div className="resource-grid">{cards.map(card => <article key={card[0]}><span>{card[0]}</span><h3>{card[1]}</h3><p>{card[2]}</p><a href="#contact">{card[3]} →</a></article>)}</div></section>
 
+    <section className="exam-shop section" id="past-exams"><div className="section-head"><div><p className="kicker">{t.examKicker}</p><h2>{t.examTitle}</h2></div><p>{t.examLead}</p></div>{exams.length ? <div className="exam-grid">{exams.map(item => <article key={item.id}><div className="exam-card-top"><span>{item.examYear}</span><small>{item.subject}</small></div><p className="exam-school">{item.schoolName}</p><h3>{item.title}</h3><p className="exam-meta">{[item.faculty, item.category].filter(Boolean).join(" · ")}</p><p className="exam-description">{item.description || t.protected}</p><div className="exam-price"><strong>¥{item.priceYen.toLocaleString()}</strong><small>{t.yen}</small></div><p className="protected-note">🔒 {t.protected}</p><div className="exam-actions">{item.previewUrl && <a href={item.previewUrl} target="_blank" rel="noreferrer">{t.preview} ↗</a>}{item.purchaseUrl ? <a className="button copper" href={item.purchaseUrl} target="_blank" rel="noreferrer">{t.buy} →</a> : <button className="button copper" onClick={() => inquireAbout(item)}>{t.inquire} →</button>}</div></article>)}</div> : <div className="exam-empty"><span>過去問</span><p>{t.examEmpty}</p></div>}</section>
+
     <section className="dark section" id="data"><div className="section-head"><div><p className="kicker">{t.dataKicker}</p><h2>{t.dataA}<em>{t.dataB}</em></h2></div><p>{t.dataBody}</p></div><div className="metrics"><div><b>132+</b><span>UNIVERSITIES</span></div><div><b>148+</b><span>PROGRAMS</span></div><div><b>2026</b><span>DATA VERSION</span></div></div><div className="data-grid"><article><small>PUBLIC</small><h3>{t.publicTitle}</h3><ul>{t.publicItems.map(x => <li key={x}>✓ {x}</li>)}</ul></article><article className="member"><small>CLASS MEMBERS</small><h3>{t.memberTitle}</h3><ul>{t.memberItems.map(x => <li key={x}>◇ {x}</li>)}</ul><a href="#contact" className="button">{t.consult} ↗</a></article></div></section>
 
     <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p></div>}</div></div></section>
 
-    <section className="uploads section" id="downloads"><div className="section-head"><div><p className="kicker">{t.uploadKicker}</p><h2>{t.uploadTitle}</h2></div><p>{t.uploadLead}</p></div>{uploads.length ? <div className="upload-grid">{uploads.map(item => <article key={item.id}><div className="upload-type">{item.fileName.split(".").pop()?.toUpperCase()}</div><small>{item.category} · {(item.sizeBytes / 1024 / 1024).toFixed(1)} MB</small><h3>{item.title}</h3><p>{item.description || item.fileName}</p>{item.downloadUrl ? <a className="button" href={item.downloadUrl}>{t.download} ↓</a> : <a className="button copper" href="#contact">{t.groupOnly} ↗</a>}</article>)}</div> : <div className="upload-empty">{t.noUploads}</div>}</section>
+    <section className="uploads section" id="downloads"><div className="section-head"><div><p className="kicker">{t.uploadKicker}</p><h2>{t.uploadTitle}</h2></div><p>{t.uploadLead}</p></div>{studyUploads.length ? <div className="upload-grid">{studyUploads.map(item => <article key={item.id}><div className="upload-type">{item.fileName.split(".").pop()?.toUpperCase()}</div><small>{item.category} · {(item.sizeBytes / 1024 / 1024).toFixed(1)} MB</small><h3>{item.title}</h3><p>{item.description || item.fileName}</p>{item.downloadUrl ? <a className="button" href={item.downloadUrl}>{t.download} ↓</a> : <a className="button copper" href="#contact">{t.groupOnly} ↗</a>}</article>)}</div> : <div className="upload-empty">{t.noUploads}</div>}</section>
 
     <section className="paper section services"><div className="section-head"><h2>{t.services}</h2></div><div className="service-grid">{t.serviceCards.map((x, i) => <article key={x[0]}><span>0{i + 1}</span><h3>{x[0]}</h3><p>{x[1]}</p><a href="#contact">{t.consult} →</a></article>)}</div></section>
 
-    <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={e => e.preventDefault()}><label>{t.name}<input required/></label><label>{t.email}<input type="email" required/></label><label>{t.message}<textarea/></label><button className="button">{t.send} ↗</button></form></section>
+    <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={e => e.preventDefault()}><label>{t.name}<input required/></label><label>{t.email}<input type="email" required/></label><label>{t.message}<textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)}/></label><button className="button">{t.send} ↗</button></form></section>
     <footer><div className="brand"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN · <a href="/admin">{t.admin}</a></span></footer>
   </main>;
 }

@@ -729,6 +729,28 @@ footer {
 .button.copper { background: var(--copper); }
 .upload-empty { border: 1px dashed var(--line); padding: 60px; text-align: center; color: var(--muted); background: #ffffff88; }
 
+/* Past exam shop */
+.exam-shop { background: #132b24; color: white; }
+.exam-shop .section-head > p { color: #afbeb8; }
+.exam-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.exam-grid article { min-width: 0; padding: 30px; background: #faf8f3; color: var(--ink); border-top: 5px solid var(--copper); display: flex; flex-direction: column; }
+.exam-card-top { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.exam-card-top span { font: 700 30px Georgia, "Noto Serif JP", serif; }
+.exam-card-top small { color: var(--copper); font-size: 9px; font-weight: 800; letter-spacing: 1px; text-align: right; }
+.exam-school { margin: 24px 0 7px; color: var(--copper); font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+.exam-grid h3 { margin: 0; font: 700 25px/1.4 Georgia, "Noto Serif JP", serif; }
+.exam-meta { margin: 9px 0 0; color: var(--muted); font-size: 10px; }
+.exam-description { min-height: 70px; color: var(--muted); line-height: 1.7; }
+.exam-price { display: flex; align-items: baseline; gap: 8px; margin-top: auto; }
+.exam-price strong { font: 700 33px Georgia, serif; }
+.exam-price small { color: var(--muted); font-size: 9px; }
+.protected-note { padding: 11px 0; border-block: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+.exam-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+.exam-actions > a:not(.button) { color: var(--copper); font-size: 10px; font-weight: 800; }
+.exam-actions .button { margin-left: auto; padding: 12px 16px; font-size: 10px; }
+.exam-empty { border: 1px dashed #60756d; padding: 55px; text-align: center; color: #b7c5c0; }
+.exam-empty span { display: grid; place-items: center; width: 80px; height: 80px; margin: 0 auto 18px; border: 1px solid #60756d; color: #dc8a69; font: 700 15px Georgia, "Noto Serif JP", serif; }
+
 /* Administrator mode */
 .admin-shell { min-height: 100vh; background: #eee8dc; }
 .admin-header { min-height: 82px; padding: 15px 5vw; display: flex; align-items: center; justify-content: space-between; background: var(--paper); border-bottom: 1px solid var(--line); }
@@ -758,6 +780,9 @@ footer {
 .admin-list article { display: grid; grid-template-columns: 54px 1fr auto; gap: 16px; padding: 19px 0; border-bottom: 1px solid var(--line); align-items: center; }
 .admin-list article:last-child { border-bottom: 0; }
 .file-badge { width: 48px; height: 48px; display: grid; place-items: center; background: #e9dfce; color: var(--forest); font-size: 9px; font-weight: 800; }
+.file-badge.paid { background: var(--copper); color: white; }
+.exam-fields { margin: 4px 0 20px; padding: 18px; background: #f6f0e6; border-left: 3px solid var(--copper); }
+.exam-fields > p { margin: 0 0 16px; color: var(--copper); font-size: 10px; font-weight: 800; letter-spacing: 1px; }
 .file-info small { color: var(--copper); font-size: 9px; }
 .file-info h3 { margin: 5px 0; font-size: 15px; }
 .file-info p { margin: 0 0 7px; color: var(--muted); font-size: 9px; overflow-wrap: anywhere; }
@@ -786,7 +811,7 @@ footer {
 .login-error { margin-top: 12px; padding: 11px; background: #fff0eb; color: #a04432; font-size: 11px; }
 .back-site { display: inline-block; margin-top: 24px; color: var(--muted); font-size: 10px; font-weight: 700; }
 @media (max-width: 950px) {
-  .upload-grid, .admin-grid { grid-template-columns: 1fr; }
+  .upload-grid, .admin-grid, .exam-grid { grid-template-columns: 1fr; }
   .upload-grid article { border-right: 0; border-bottom: 1px solid var(--line); }
 }
 @media (max-width: 560px) {

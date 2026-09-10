@@ -4,7 +4,9 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 
 type Resource = {
   id: string; title: string; description: string; category: string; language: string;
-  access_level: "public" | "group"; status: "draft" | "published"; file_name: string;
+  access_level: "public" | "group" | "paid"; status: "draft" | "published"; file_name: string;
+  resource_kind: "study" | "exam"; school_name: string; faculty: string; exam_year: string;
+  subject: string; price_yen: number; purchase_url: string; preview_name: string | null;
   content_type: string; size_bytes: number; created_at: number;
 };
 
@@ -15,6 +17,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [resourceKind, setResourceKind] = useState<"study" | "exam">("study");
 
   const loadResources = useCallback(async () => {
     const response = await fetch("/api/admin/resources", { cache: "no-store" });
@@ -32,7 +35,7 @@ export default function AdminPanel() {
       const response = await fetch("/api/admin/resources", { method: "POST", body: new FormData(form) });
       const data = await response.json() as { error?: string };
       if (!response.ok) throw new Error(data.error || "上传失败");
-      form.reset(); setMessage("上传成功。资料已经保存到网站后台。"); await loadResources();
+      form.reset(); setResourceKind("study"); setMessage("上传成功。资料已经保存到网站后台。"); await loadResources();
     } catch (error) { setMessage(error instanceof Error ? error.message : "上传失败"); }
     finally { setBusy(false); }
   }
@@ -59,18 +62,20 @@ export default function AdminPanel() {
 
   return <main className="admin-shell">
     <header className="admin-header"><a className="brand" href="/"><img src="/ebi-icon.png" alt=""/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></a><div><span>管理员模式</span><a href="/">查看网站</a><button className="link-button" onClick={logout}>退出登录</button></div></header>
-    <section className="admin-hero"><p>EBI ADMIN MODE</p><h1>网站上线后，也可以随时上传资料。</h1><p>PDF、Word、Excel 和视频会永久保存。设置为“已发布”后，访客无需重新部署网站即可看到。</p></section>
+    <section className="admin-hero"><p>EBI ADMIN MODE</p><h1>学习资料与校内考真题，一站管理。</h1><p>上传普通学习资料，或创建带价格、试看文件和付款链接的校内考真题商品。设置为“已发布”后会立即显示在网站。</p></section>
     <section className="admin-grid">
       <form className="upload-card" onSubmit={upload}>
-        <div className="admin-title"><span>01</span><div><h2>上传新资料</h2><p>单个文件最大 100 MB</p></div></div>
+        <div className="admin-title"><span>01</span><div><h2>上传资料 / 真题商品</h2><p>原文件最大 100 MB</p></div></div>
+        <label>内容类型<select name="resourceKind" value={resourceKind} onChange={event => setResourceKind(event.target.value as "study" | "exam")}><option value="study">普通学习资料</option><option value="exam">校内考往年真题（付费）</option></select></label>
         <label>资料标题<input name="title" required placeholder="例如：2026 EJU 日语听力讲义"/></label>
         <label>简介<textarea name="description" placeholder="简单说明资料内容"/></label>
-        <div className="admin-fields"><label>分类<select name="category"><option>EJU</option><option>录播课程</option><option>英语备考</option><option>大学信息</option><option>申请材料</option></select></label><label>语言<select name="language"><option value="ja">日语</option><option value="zh">中文</option><option value="en">英语</option></select></label></div>
-        <div className="admin-fields"><label>访问方式<select name="accessLevel"><option value="public">公开下载</option><option value="group">加入学习群后获取</option></select></label><label>状态<select name="status"><option value="draft">草稿</option><option value="published">立即发布</option></select></label></div>
-        <label className="file-drop">选择文件<input name="file" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.mp4,.mov,.m4v"/><span>支持 PDF · DOCX · XLSX · MP4</span></label>
+        {resourceKind === "exam" && <div className="exam-fields"><p>商品信息</p><div className="admin-fields"><label>大学名称<input name="schoolName" required placeholder="例如：早稻田大学"/></label><label>学部 / 研究科<input name="faculty" placeholder="例如：商学部"/></label></div><div className="admin-fields"><label>考试年度<input name="examYear" required placeholder="例如：2025"/></label><label>科目<input name="subject" required placeholder="例如：小论文・数学"/></label></div><div className="admin-fields"><label>售价（日元）<input name="priceYen" type="number" min="1" step="1" required placeholder="2980"/></label><label>付款链接（选填）<input name="purchaseUrl" type="url" placeholder="https://..."/></label></div><label className="file-drop">试看文件（选填）<input name="previewFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp"/><span>支持 PDF / 图片，最大 15 MB；请勿包含完整答案。</span></label></div>}
+        <div className="admin-fields"><label>分类<select name="category"><option>{resourceKind === "exam" ? "校内考真题" : "EJU"}</option><option>录播课程</option><option>英语备考</option><option>大学信息</option><option>申请材料</option></select></label><label>语言<select name="language"><option value="ja">日语</option><option value="zh">中文</option><option value="en">英语</option></select></label></div>
+        <div className="admin-fields">{resourceKind === "study" && <label>访问方式<select name="accessLevel"><option value="public">公开下载</option><option value="group">加入学习群后获取</option></select></label>}<label>状态<select name="status"><option value="draft">草稿</option><option value="published">立即发布</option></select></label></div>
+        <label className="file-drop">{resourceKind === "exam" ? "上传完整真题文件（仅后台保存）" : "选择资料文件"}<input name="file" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.mp4,.mov,.m4v"/><span>支持 PDF · DOCX · XLSX · MP4</span></label>
         <button disabled={busy}>{busy ? "处理中……" : "上传并保存"}</button>{message && <p className="admin-message" role="status">{message}</p>}
       </form>
-      <div className="library-card"><div className="admin-title"><span>02</span><div><h2>资料库</h2><p>{resources.length} 个文件</p></div></div>{loading ? <p>正在读取……</p> : resources.length === 0 ? <div className="empty-library">还没有上传资料。</div> : <div className="admin-list">{resources.map(resource => <article key={resource.id}><div className="file-badge">{resource.file_name.split(".").pop()?.toUpperCase()}</div><div className="file-info"><small>{resource.category} · {formatBytes(resource.size_bytes)}</small><h3>{resource.title}</h3><p>{resource.file_name}</p><div><span className={resource.status}>{resource.status === "published" ? "已发布" : "草稿"}</span><span>{resource.access_level === "public" ? "公开下载" : "学习群限定"}</span></div></div><div className="file-actions"><button disabled={busy} onClick={() => update(resource, { status: resource.status === "published" ? "draft" : "published" })}>{resource.status === "published" ? "撤下" : "发布"}</button><button disabled={busy} onClick={() => update(resource, { access_level: resource.access_level === "public" ? "group" : "public" })}>切换权限</button><button className="danger" disabled={busy} onClick={() => remove(resource)}>删除</button></div></article>)}</div>}</div>
+      <div className="library-card"><div className="admin-title"><span>02</span><div><h2>资料与商品库</h2><p>{resources.length} 个文件</p></div></div>{loading ? <p>正在读取……</p> : resources.length === 0 ? <div className="empty-library">还没有上传资料。</div> : <div className="admin-list">{resources.map(resource => <article key={resource.id}><div className={`file-badge ${resource.resource_kind === "exam" ? "paid" : ""}`}>{resource.resource_kind === "exam" ? "真题" : resource.file_name.split(".").pop()?.toUpperCase()}</div><div className="file-info"><small>{resource.resource_kind === "exam" ? `${resource.school_name} · ${resource.exam_year} · ¥${resource.price_yen.toLocaleString()}` : `${resource.category} · ${formatBytes(resource.size_bytes)}`}</small><h3>{resource.title}</h3><p>{resource.resource_kind === "exam" ? `${resource.faculty || "学部未填写"} · ${resource.subject}${resource.preview_name ? " · 有试看" : ""}` : resource.file_name}</p><div><span className={resource.status}>{resource.status === "published" ? "已发布" : "草稿"}</span><span>{resource.resource_kind === "exam" ? "付费商品" : resource.access_level === "public" ? "公开下载" : "学习群限定"}</span></div></div><div className="file-actions"><button disabled={busy} onClick={() => update(resource, { status: resource.status === "published" ? "draft" : "published" })}>{resource.status === "published" ? "撤下" : "发布"}</button>{resource.resource_kind !== "exam" && <button disabled={busy} onClick={() => update(resource, { access_level: resource.access_level === "public" ? "group" : "public" })}>切换权限</button>}<button className="danger" disabled={busy} onClick={() => remove(resource)}>删除</button></div></article>)}</div>}</div>
     </section>
   </main>;
 }

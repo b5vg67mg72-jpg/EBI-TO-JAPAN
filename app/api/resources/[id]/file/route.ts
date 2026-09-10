@@ -6,7 +6,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   await ensureResourceSchema();
   const { id } = await context.params;
   const { DB, FILES } = getResourceBindings();
-  const row = await DB.prepare("SELECT * FROM resources WHERE id = ? AND status = ? AND access_level = ?").bind(id, "published", "public").first<ResourceRow>();
+  const row = await DB.prepare("SELECT * FROM resources WHERE id = ? AND status = ? AND access_level = ? AND resource_kind != ?").bind(id, "published", "public", "exam").first<ResourceRow>();
   if (!row) return Response.json({ error: "Resource not found" }, { status: 404 });
   const object = await FILES.get(row.file_key);
   if (!object) return Response.json({ error: "File not found" }, { status: 404 });
