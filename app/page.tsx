@@ -7,6 +7,8 @@ type AnalysisResult = {
   label: string;
   score: number;
   level: string;
+  confidence: number;
+  confidenceLabel: string;
   reason: string;
   metrics: { label: string; value: number; positive?: boolean }[];
   flags: string[];
@@ -32,16 +34,16 @@ const copy = {
     dataBody: "募集要項、学部・学科、EJU・英語要件、出願日程を整理し、実行しやすい受験計画へつなげます。",
     publicTitle: "誰でも閲覧できる情報", publicItems: ["募集要項・出願日程", "学部・専攻・試験科目", "公表された合格率・倍率"],
     memberTitle: "受講生限定の分析", memberItems: ["大学別の得点ポジション", "過去問の出題傾向", "個別の併願・日程戦略"],
-    aiKicker: "ADMISSIONS LAB", aiTitle: "志望理由書 AI判定・類似度チェック", aiBody: "AI作成の可能性、文章内の繰り返し、参考文章との類似度を確認できます。",
+    aiKicker: "SHIBO RIYUSHO AI DETECTOR", aiTitle: "志望理由書 AI検出ツール", aiBody: "志望理由書に特化し、文体・定型表現・具体性・本人らしさからAI作成の可能性を分析します。文章はブラウザ内で処理され、保存されません。",
     statement: "チェックする志望理由書", statementPh: "志望理由書を貼り付けてください", reference: "比較する参考文章（任意）", referencePh: "テンプレートや参考文章を貼り付けてください",
-    aiBtn: "AI作成可能性を判定", simBtn: "類似度をチェック", empty: "先に志望理由書を入力してください。",
+    aiBtn: "AIリスクを分析", simBtn: "類似度をチェック", empty: "先に志望理由書を入力してください。", confidence: "判定の信頼度", tooShort: "精度を上げるため、120文字以上の文章を入力してください。", privacy: "入力内容は送信・保存されません", detectorNote: "日本語・中国語・英語に対応",
     aiLabel: "AI作成の可能性", simLabel: "文章の類似度", low: "低い", mid: "中程度", high: "高い",
     aiReason: "文章の均一さ、定型表現、具体的な経験の量から推定しました。", simReason: "文章内の長い表現と、貼り付けた参考文章を比較しました。",
     disclaimer: "結果は参考情報です。AI作成や盗用を断定するものではなく、インターネット全体を検索する全庫型判定ではありません。",
     chars: "文字", clear: "入力をクリア", signals: "検出したポイント", suggestions: "改善のヒント", noSignals: "目立つ問題は見つかりませんでした。",
-    metricNames: ["文体の均一さ", "定型表現リスク", "具体性", "文章内の反復", "参考文との一致"],
-    flagTexts: ["文の長さとリズムが非常に均一です。", "よく使われる定型表現が複数あります。", "固有の経験・数字・授業名が少なめです。", "同じ長い表現が文章内で繰り返されています。", "参考文と共通する長い表現があります。"],
-    advice: ["自分だけの出来事を、状況・行動・結果の順で具体的に書きましょう。", "大学名だけでなく、授業・ゼミ・教授・制度と目標のつながりを説明しましょう。", "同じ長さの文が続く部分を見直し、短文と長文にリズムをつけましょう。", "定型表現を、自分が実際に感じた言葉へ置き換えましょう。", "参考文と似た箇所は引用せず、自分の経験から書き直しましょう。"],
+    metricNames: ["文体の均一さ", "定型表現", "具体的な情報", "本人らしさ", "語彙の多様性", "反復表現", "参考文との一致"],
+    flagTexts: ["文の長さとリズムが非常に均一です。", "よく使われる定型表現・接続表現が多く見られます。", "経験・数字・授業名などの具体的な情報が少なめです。", "同じ長い表現が文章内で繰り返されています。", "参考文と共通する長い表現があります。", "自分の行動や感情を示す一人称表現が少なめです。", "語彙の種類が少なく、似た言葉が続いています。"],
+    advice: ["自分だけの出来事を、状況・行動・結果の順で具体的に書きましょう。", "大学名だけでなく、授業・ゼミ・教授・制度と目標のつながりを説明しましょう。", "同じ長さの文が続く部分を見直し、短文と長文にリズムをつけましょう。", "定型表現を、自分が実際に感じた言葉へ置き換えましょう。", "参考文と似た箇所は引用せず、自分の経験から書き直しましょう。", "「私は何を見て、どう考え、何をしたか」を自分の言葉で加えましょう。", "繰り返している名詞や形容詞を、より具体的な表現に置き換えましょう。"],
     uploadKicker: "NEW RESOURCES", uploadTitle: "最新の学習資料", uploadLead: "管理者が追加した教材は、公開後すぐにここへ表示されます。", download: "ダウンロード", groupOnly: "学習グループで受け取る", noUploads: "新しい公開資料は準備中です。", admin: "管理者ログイン",
     examKicker: "PAST EXAM SHOP", examTitle: "大学別・校内考の過去問", examLead: "大学・学部・年度・科目から必要な過去問を選べます。購入前に商品情報とサンプルをご確認ください。", examEmpty: "校内考の過去問商品は準備中です。", preview: "サンプルを見る", buy: "購入する", inquire: "購入について問い合わせる", yen: "円", protected: "購入後に完全版をご案内します。",
     services: "学習と進学を、一つの流れで支える。", serviceCards: [["EJU月額講座", "精聴・精読、学習計画、質問対応"], ["マンツーマン指導", "苦手科目と大学独自試験の準備"], ["大学受験総合プラン", "大学選び、出願書類、志望理由書、面接"]],
@@ -58,13 +60,13 @@ const copy = {
     freeList: ["Core listening and reading steps", "Turn mistakes into points", "A practical review routine"], join: "Join the study group",
     dataKicker: "UNIVERSITY DATA", dataA: "Choose with evidence,", dataB: "not guesswork.", dataBody: "We organize admissions guides, programs, EJU and English requirements, and application dates into an actionable plan.",
     publicTitle: "Public information", publicItems: ["Admissions guides and dates", "Programs and exam subjects", "Published acceptance rates"], memberTitle: "Class-member analysis", memberItems: ["Score-position analysis", "Past-exam trends", "Personal application strategy"],
-    aiKicker: "ADMISSIONS LAB", aiTitle: "Statement AI & Similarity Check", aiBody: "Estimate AI-written likelihood, internal repetition, and similarity to a reference text.",
-    statement: "Statement to check", statementPh: "Paste your statement here", reference: "Reference text (optional)", referencePh: "Paste a template or reference text", aiBtn: "Check AI likelihood", simBtn: "Check similarity", empty: "Enter a statement first.",
+    aiKicker: "SHIBO RIYUSHO AI DETECTOR", aiTitle: "Statement of Purpose AI Detector", aiBody: "Designed for Japanese university statements. It assesses writing rhythm, formulaic language, specificity, and personal voice. Text is analyzed in your browser and is not stored.",
+    statement: "Statement to check", statementPh: "Paste your statement here", reference: "Reference text (optional)", referencePh: "Paste a template or reference text", aiBtn: "Analyze AI risk", simBtn: "Check similarity", empty: "Enter a statement first.", confidence: "Detection confidence", tooShort: "Enter at least 120 characters for a more reliable result.", privacy: "Your text is not sent or stored", detectorNote: "Supports Japanese, Chinese, and English",
     aiLabel: "AI-written likelihood", simLabel: "Text similarity", low: "Low", mid: "Moderate", high: "High", aiReason: "Estimated from writing consistency, formulaic phrasing, and the amount of specific personal detail.", simReason: "Compared long phrases within the statement and against the reference text you supplied.", disclaimer: "This is a reference signal, not proof of AI use or plagiarism, and it does not search the entire internet.",
     chars: "characters", clear: "Clear text", signals: "Signals found", suggestions: "How to improve", noSignals: "No prominent issues were found.",
-    metricNames: ["Style uniformity", "Formulaic-language risk", "Specific detail", "Internal repetition", "Reference overlap"],
-    flagTexts: ["Sentence lengths and rhythm are unusually uniform.", "Several common template phrases appear in the text.", "There are few personal events, numbers, class names, or other concrete details.", "Long phrases repeat within the statement.", "Long phrases overlap with the supplied reference."],
-    advice: ["Describe one personal event through its situation, your action, and the result.", "Connect specific classes, seminars, faculty, or programs to your goal—not only the university name.", "Vary the rhythm by reviewing sections where sentences have nearly identical lengths.", "Replace template phrases with words that reflect what you actually experienced.", "Rewrite overlapping passages from your own experience instead of borrowing the reference wording."],
+    metricNames: ["Style uniformity", "Formulaic language", "Concrete details", "Personal voice", "Vocabulary diversity", "Repetition", "Reference overlap"],
+    flagTexts: ["Sentence lengths and rhythm are unusually uniform.", "The statement uses many common template or transition phrases.", "There are few personal events, numbers, class names, or other concrete details.", "Long phrases repeat within the statement.", "Long phrases overlap with the supplied reference.", "There is little first-person language showing your own actions or feelings.", "Vocabulary is limited and similar words recur frequently."],
+    advice: ["Describe one personal event through its situation, your action, and the result.", "Connect specific classes, seminars, faculty, or programs to your goal, not only the university name.", "Vary the rhythm by reviewing sections where sentences have nearly identical lengths.", "Replace template phrases with words that reflect what you actually experienced.", "Rewrite overlapping passages from your own experience instead of borrowing the reference wording.", "Add what you saw, thought, and did in your own words.", "Replace repeated nouns and adjectives with more precise details."],
     uploadKicker: "NEW RESOURCES", uploadTitle: "Latest study materials", uploadLead: "Materials added by the administrator appear here as soon as they are published.", download: "Download", groupOnly: "Get it in the study group", noUploads: "New public resources are being prepared.", admin: "Administrator login",
     examKicker: "PAST EXAM SHOP", examTitle: "University entrance past exams", examLead: "Browse by university, faculty, year, and subject. Review the item details and sample before purchasing.", examEmpty: "Past-exam products are being prepared.", preview: "View sample", buy: "Buy now", inquire: "Ask to purchase", yen: "JPY", protected: "The complete file is provided after purchase.",
     services: "Learning and admissions support in one clear path.", serviceCards: [["Monthly EJU Course", "Listening, reading, planning, and Q&A"], ["One-to-one Tutoring", "Weak subjects and university-specific exams"], ["Complete Admissions Plan", "University choice, documents, statement, and interview"]],
@@ -78,13 +80,13 @@ const copy = {
     freeTitle: "EJU日语精听精读入门", freeBody: "先体验一节短小的免费课程，学习不止于做题的复习方法。", freeList: ["精听精读基本步骤", "把错误转化为得分", "容易执行的复习流程"], join: "加入学习群",
     dataKicker: "大学数据", dataA: "不凭感觉，", dataB: "用数据选择大学。", dataBody: "整理募集要项、专业、EJU与英语要求和出愿时间，形成可执行的申请计划。",
     publicTitle: "所有人可查看", publicItems: ["募集要项与出愿时间", "专业与考试科目", "公开的合格率与倍率"], memberTitle: "课程学员限定", memberItems: ["大学分数定位分析", "过去问出题趋势", "个人选校与时间策略"],
-    aiKicker: "升学工具", aiTitle: "志望理由书 AI判定・查重", aiBody: "检查AI生成可能性、文章内部重复，并与粘贴的参考文章比较相似度。",
-    statement: "需要检查的志望理由书", statementPh: "请粘贴志望理由书", reference: "参考文章（选填）", referencePh: "请粘贴模板或参考文章", aiBtn: "检测AI生成可能性", simBtn: "AI查重", empty: "请先输入志望理由书。",
+    aiKicker: "志望理由书 AI DETECTOR", aiTitle: "志望理由书 AI 检测器", aiBody: "针对日本大学志望理由书，从文风、模板表达、具体程度和个人经历等维度检测AI生成风险。文章仅在浏览器中分析，不会保存。",
+    statement: "需要检查的志望理由书", statementPh: "请粘贴志望理由书", reference: "参考文章（选填）", referencePh: "请粘贴模板或参考文章", aiBtn: "分析 AI 风险", simBtn: "相似度检查", empty: "请先输入志望理由书。", confidence: "判定可信度", tooShort: "为提高准确度，请输入至少120字。", privacy: "输入内容不会上传或保存", detectorNote: "支持日语、中文和英语",
     aiLabel: "AI生成的可能性", simLabel: "文章相似度", low: "较低", mid: "中等", high: "较高", aiReason: "根据行文一致性、模板表达和具体个人经历的数量估算。", simReason: "比较文章内部的长表达，并与您提供的参考文章进行对比。", disclaimer: "结果仅供参考，不能证明AI生成或抄袭，也不会搜索整个互联网。",
     chars: "字", clear: "清空内容", signals: "检测到的问题", suggestions: "修改建议", noSignals: "没有发现明显问题。",
-    metricNames: ["文风一致性", "模板化表达风险", "个人细节强度", "文内重复", "参考文重合"],
-    flagTexts: ["句子长度和行文节奏过于均匀。", "文章中出现了多个常见模板表达。", "个人经历、数字、课程名等具体细节较少。", "文章内部存在重复的长表达。", "部分长表达与参考文章重合。"],
-    advice: ["加入只有你本人才能写出的经历，并按情况、行动、结果展开。", "不要只写大学名称，要说明具体课程、研究室、教授或制度与目标的关系。", "检查长度相近的连续句子，适当搭配长句和短句。", "把模板化表达改成你真实体验后的语言。", "不要照搬参考文，请从自己的经历重新组织相似段落。"],
+    metricNames: ["文风一致性", "模板化表达", "具体信息", "个人表达", "词汇多样性", "文内重复", "参考文重合"],
+    flagTexts: ["句子长度和行文节奏过于均匀。", "文章中出现了较多模板或连接表达。", "个人经历、数字、课程名等具体信息较少。", "文章内部存在重复的长表达。", "部分长表达与参考文章重合。", "体现本人行动或感受的第一人称表达较少。", "词汇种类较少，相似用词反复出现。"],
+    advice: ["加入只有你本人才能写出的经历，并按情况、行动、结果展开。", "不要只写大学名称，要说明具体课程、研究室、教授或制度与目标的关系。", "检查长度相近的连续句子，适当搭配长句和短句。", "把模板化表达改成你真实体验后的语言。", "不要照搬参考文，请从自己的经历重新组织相似段落。", "加入“我看到了什么、怎么想、做了什么”等本人视角。", "把重复的名词或形容词换成更准确、具体的描述。"],
     uploadKicker: "最新资料", uploadTitle: "最新学习资料", uploadLead: "管理员上传并发布后，资料会立即显示在这里，不需要重新部署网站。", download: "下载资料", groupOnly: "加入学习群获取", noUploads: "新的公开资料正在准备中。", admin: "管理员登录",
     examKicker: "校内考真题商城", examTitle: "大学校内考往年真题", examLead: "可按大学、学部、年度和科目查看真题。购买前请确认商品信息，并可先查看试看文件。", examEmpty: "校内考真题商品正在准备中。", preview: "查看试看", buy: "立即购买", inquire: "咨询购买", yen: "日元", protected: "购买后获取完整真题文件。",
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
@@ -95,6 +97,11 @@ const copy = {
 function normalizeText(value: string) { return value.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, ""); }
 function shingles(value: string, size = 9) { const clean = normalizeText(value); return Array.from({ length: Math.max(0, clean.length - size + 1) }, (_, i) => clean.slice(i, i + size)); }
 function clamp(value: number) { return Math.max(0, Math.min(100, Math.round(value))); }
+function tokens(value: string) {
+  const latin = value.toLowerCase().match(/[a-z][a-z'-]*/g) || [];
+  const cjk = (value.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー]+/gu) || []).flatMap(chunk => Array.from({ length: Math.max(1, chunk.length - 1) }, (_, index) => chunk.slice(index, index + 2)));
+  return [...latin, ...cjk];
+}
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("ja");
@@ -104,33 +111,41 @@ export default function Home() {
   const [uploads, setUploads] = useState<UploadedResource[]>([]);
   const [contactMessage, setContactMessage] = useState("");
   const t = copy[lang];
-  const level = (score: number) => score >= 60 ? t.high : score >= 28 ? t.mid : t.low;
+  const level = (score: number) => score >= 60 ? t.high : score >= 35 ? t.mid : t.low;
 
   useEffect(() => {
     fetch("/api/resources").then(response => response.ok ? response.json() : { resources: [] }).then((data: { resources?: UploadedResource[] }) => setUploads(data.resources || [])).catch(() => setUploads([]));
   }, []);
 
   function checkAI() {
-    if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, reason: t.empty, metrics: [], flags: [], suggestions: [] });
-    const sentences = statement.split(/[。！？!?\.]+/).filter(Boolean);
+    if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, confidence: 0, confidenceLabel: t.confidence, reason: t.empty, metrics: [], flags: [], suggestions: [] });
+    const cleanLength = normalizeText(statement).length;
+    const sentences = statement.split(/[。！？!?\.]+/).map(sentence => sentence.trim()).filter(Boolean);
     const lengths = sentences.map(s => s.trim().length);
     const avg = lengths.reduce((a, b) => a + b, 0) / Math.max(1, lengths.length);
     const variation = avg ? Math.sqrt(lengths.reduce((a, b) => a + (b - avg) ** 2, 0) / Math.max(1, lengths.length)) / avg : 0;
-    const generic = (statement.match(/昔から|魅力を感じ|将来は|貢献したい|从小就|一直以来|贵校|为社会做贡献|I have always|make a contribution|passionate about/gi) || []).length;
-    const details = (statement.match(/[0-9０-９]|教授|ゼミ|授業|研究|大会|アルバイト|project|professor|course|internship|课程|项目|实习|比赛/g) || []).length;
+    const generic = (statement.match(/昔から|魅力を感じ|将来は|貢献したい|学びたいと考え|志望いたします|また|さらに|したがって|从小就|一直以来|贵校|为社会做贡献|综上所述|此外|因此|I have always|make a contribution|passionate about|furthermore|moreover|in conclusion/gi) || []).length;
+    const details = (statement.match(/[0-9０-９]|教授|ゼミ|授業|研究室|大会|アルバイト|高校|部活|ボランティア|project|professor|course|internship|club|competition|课程|项目|实习|比赛|高中|社团|志愿/g) || []).length;
+    const personal = (statement.match(/私[はがの]|自分|私自身|感じた|気づいた|経験した|取り組んだ|我|我的|亲自|感到|意识到|经历|I\b|my\b|me\b|myself|I’ve|I have/gi) || []).length;
+    const allTokens = tokens(statement);
+    const diversity = allTokens.length ? new Set(allTokens).size / allTokens.length : 0;
     const sentenceUniformity = clamp((1 - Math.min(variation, .75) / .75) * 100);
-    const formulaRisk = clamp(generic * 22);
-    const detailStrength = clamp(details * 14 + Math.min(statement.length / 12, 25));
+    const formulaRisk = clamp((generic / Math.max(1, sentences.length)) * 45);
+    const detailStrength = clamp(details * 11 + Math.min(cleanLength / 18, 25));
+    const personalVoice = clamp(personal * 10 + Math.min(variation * 45, 20));
+    const vocabularyStrength = clamp((diversity - .35) * 155);
     const source = shingles(statement); const repeated = source.length ? 1 - new Set(source).size / source.length : 0;
     const repetitionRisk = clamp(repeated * 180);
-    const score = clamp(18 + sentenceUniformity * .35 + formulaRisk * .28 + repetitionRisk * .18 - detailStrength * .25);
-    const flags = [sentenceUniformity > 72 ? t.flagTexts[0] : "", formulaRisk > 30 ? t.flagTexts[1] : "", detailStrength < 35 ? t.flagTexts[2] : "", repetitionRisk > 24 ? t.flagTexts[3] : ""].filter(Boolean);
-    const suggestions = [detailStrength < 55 ? t.advice[0] : "", detailStrength < 45 ? t.advice[1] : "", sentenceUniformity > 72 ? t.advice[2] : "", formulaRisk > 30 ? t.advice[3] : ""].filter(Boolean).slice(0, 3);
-    setResult({ label: t.aiLabel, score, level: level(score), reason: t.aiReason, metrics: [{ label: t.metricNames[0], value: sentenceUniformity }, { label: t.metricNames[1], value: formulaRisk }, { label: t.metricNames[2], value: detailStrength, positive: true }, { label: t.metricNames[3], value: repetitionRisk }], flags, suggestions });
+    const confidence = clamp(Math.min(cleanLength / 4, 78) + Math.min(sentences.length * 2, 17));
+    const evidenceScore = 12 + sentenceUniformity * .17 + formulaRisk * .22 + repetitionRisk * .1 + Math.max(0, 45 - detailStrength) * .25 + Math.max(0, 40 - personalVoice) * .2 + Math.max(0, 35 - vocabularyStrength) * .12;
+    const score = clamp(50 + (evidenceScore - 50) * (0.35 + confidence / 155));
+    const flags = [cleanLength < 120 ? t.tooShort : "", sentenceUniformity > 76 && sentences.length >= 4 ? t.flagTexts[0] : "", formulaRisk > 38 ? t.flagTexts[1] : "", detailStrength < 32 ? t.flagTexts[2] : "", repetitionRisk > 24 ? t.flagTexts[3] : "", personalVoice < 28 ? t.flagTexts[5] : "", vocabularyStrength < 25 && allTokens.length > 35 ? t.flagTexts[6] : ""].filter(Boolean);
+    const suggestions = [detailStrength < 55 ? t.advice[0] : "", detailStrength < 45 ? t.advice[1] : "", sentenceUniformity > 72 ? t.advice[2] : "", formulaRisk > 30 ? t.advice[3] : "", personalVoice < 40 ? t.advice[5] : "", vocabularyStrength < 30 ? t.advice[6] : ""].filter(Boolean).slice(0, 4);
+    setResult({ label: t.aiLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, reason: cleanLength < 120 ? t.tooShort : t.aiReason, metrics: [{ label: t.metricNames[0], value: sentenceUniformity }, { label: t.metricNames[1], value: formulaRisk }, { label: t.metricNames[2], value: detailStrength, positive: true }, { label: t.metricNames[3], value: personalVoice, positive: true }, { label: t.metricNames[4], value: vocabularyStrength, positive: true }, { label: t.metricNames[5], value: repetitionRisk }], flags, suggestions });
   }
 
   function checkSimilarity() {
-    if (!statement.trim()) return setResult({ label: t.simLabel, score: 0, level: t.low, reason: t.empty, metrics: [], flags: [], suggestions: [] });
+    if (!statement.trim()) return setResult({ label: t.simLabel, score: 0, level: t.low, confidence: 0, confidenceLabel: t.confidence, reason: t.empty, metrics: [], flags: [], suggestions: [] });
     const source = shingles(statement); const unique = new Set(source);
     const repeated = source.length ? 1 - unique.size / source.length : 0;
     const internalScore = clamp(repeated * 180);
@@ -139,7 +154,8 @@ export default function Home() {
     const score = reference.trim() ? referenceScore : internalScore;
     const flags = [internalScore > 24 ? t.flagTexts[3] : "", referenceScore > 18 ? t.flagTexts[4] : ""].filter(Boolean);
     const suggestions = [internalScore > 24 ? t.advice[3] : "", referenceScore > 18 ? t.advice[4] : ""].filter(Boolean);
-    setResult({ label: t.simLabel, score, level: level(score), reason: t.simReason, metrics: [{ label: t.metricNames[3], value: internalScore }, { label: t.metricNames[4], value: referenceScore }], flags, suggestions });
+    const confidence = clamp(Math.min(normalizeText(statement).length / 4, 80) + (reference.trim() ? 20 : 5));
+    setResult({ label: t.simLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, reason: t.simReason, metrics: [{ label: t.metricNames[5], value: internalScore }, { label: t.metricNames[6], value: referenceScore }], flags, suggestions });
   }
 
   function clearTool() { setStatement(""); setReference(""); setResult(null); }
@@ -165,7 +181,7 @@ export default function Home() {
 
     <section className="dark section" id="data"><div className="section-head"><div><p className="kicker">{t.dataKicker}</p><h2>{t.dataA}<em>{t.dataB}</em></h2></div><p>{t.dataBody}</p></div><div className="metrics"><div><b>132+</b><span>UNIVERSITIES</span></div><div><b>148+</b><span>PROGRAMS</span></div><div><b>2026</b><span>DATA VERSION</span></div></div><div className="data-grid"><article><small>PUBLIC</small><h3>{t.publicTitle}</h3><ul>{t.publicItems.map(x => <li key={x}>✓ {x}</li>)}</ul></article><article className="member"><small>CLASS MEMBERS</small><h3>{t.memberTitle}</h3><ul>{t.memberItems.map(x => <li key={x}>◇ {x}</li>)}</ul><a href="#contact" className="button">{t.consult} ↗</a></article></div></section>
 
-    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p></div>}</div></div></section>
+    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="detector-badges"><span>✓ {t.privacy}</span><span>✓ {t.detectorNote}</span></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><div className="confidence"><span>{result.confidenceLabel}</span><i><b style={{width: `${result.confidence}%`}}/></i><strong>{result.confidence}%</strong></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p><div className="placeholder-lines"><span/><span/><span/></div></div>}</div></div></section>
 
     <section className="uploads section" id="downloads"><div className="section-head"><div><p className="kicker">{t.uploadKicker}</p><h2>{t.uploadTitle}</h2></div><p>{t.uploadLead}</p></div>{studyUploads.length ? <div className="upload-grid">{studyUploads.map(item => <article key={item.id}><div className="upload-type">{item.fileName.split(".").pop()?.toUpperCase()}</div><small>{item.category} · {(item.sizeBytes / 1024 / 1024).toFixed(1)} MB</small><h3>{item.title}</h3><p>{item.description || item.fileName}</p>{item.downloadUrl ? <a className="button" href={item.downloadUrl}>{t.download} ↓</a> : <a className="button copper" href="#contact">{t.groupOnly} ↗</a>}</article>)}</div> : <div className="upload-empty">{t.noUploads}</div>}</section>
 
