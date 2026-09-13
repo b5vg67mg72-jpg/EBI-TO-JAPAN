@@ -1,5 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- vinext's next/image shim causes client hook errors. */
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type Lang = "ja" | "en" | "zh";
@@ -9,6 +11,9 @@ type AnalysisResult = {
   level: string;
   confidence: number;
   confidenceLabel: string;
+  language: string;
+  characters: number;
+  sentenceCount: number;
   reason: string;
   metrics: { label: string; value: number; positive?: boolean }[];
   flags: string[];
@@ -36,7 +41,7 @@ const copy = {
     memberTitle: "受講生限定の分析", memberItems: ["大学別の得点ポジション", "過去問の出題傾向", "個別の併願・日程戦略"],
     aiKicker: "SHIBO RIYUSHO AI DETECTOR", aiTitle: "志望理由書 AI検出ツール", aiBody: "志望理由書に特化し、文体・定型表現・具体性・本人らしさからAI作成の可能性を分析します。文章はブラウザ内で処理され、保存されません。",
     statement: "チェックする志望理由書", statementPh: "志望理由書を貼り付けてください", reference: "比較する参考文章（任意）", referencePh: "テンプレートや参考文章を貼り付けてください",
-    aiBtn: "AIリスクを分析", simBtn: "類似度をチェック", empty: "先に志望理由書を入力してください。", confidence: "判定の信頼度", tooShort: "精度を上げるため、120文字以上の文章を入力してください。", privacy: "入力内容は送信・保存されません", detectorNote: "日本語・中国語・英語に対応",
+    aiBtn: "AIリスクを分析", simBtn: "類似度をチェック", sample: "サンプルを入力", inputNeeded: "入力内容を確認してください", empty: "先に志望理由書を入力してください。", referenceRequired: "類似度を確認するには、比較する参考文章も入力してください。", confidence: "判定の信頼度", tooShort: "精度を上げるため、120文字以上の文章を入力してください。", privacy: "入力内容は送信・保存されません", detectorNote: "日本語・中国語・英語に対応", textStats: ["検出言語", "文字数", "文の数"], languageNames: ["日本語", "中国語", "英語", "混在・不明"], sentencesUnit: "文",
     aiLabel: "AI作成の可能性", simLabel: "文章の類似度", low: "低い", mid: "中程度", high: "高い",
     aiReason: "文章の均一さ、定型表現、具体的な経験の量から推定しました。", simReason: "文章内の長い表現と、貼り付けた参考文章を比較しました。",
     disclaimer: "結果は参考情報です。AI作成や盗用を断定するものではなく、インターネット全体を検索する全庫型判定ではありません。",
@@ -61,7 +66,7 @@ const copy = {
     dataKicker: "UNIVERSITY DATA", dataA: "Choose with evidence,", dataB: "not guesswork.", dataBody: "We organize admissions guides, programs, EJU and English requirements, and application dates into an actionable plan.",
     publicTitle: "Public information", publicItems: ["Admissions guides and dates", "Programs and exam subjects", "Published acceptance rates"], memberTitle: "Class-member analysis", memberItems: ["Score-position analysis", "Past-exam trends", "Personal application strategy"],
     aiKicker: "SHIBO RIYUSHO AI DETECTOR", aiTitle: "Statement of Purpose AI Detector", aiBody: "Designed for Japanese university statements. It assesses writing rhythm, formulaic language, specificity, and personal voice. Text is analyzed in your browser and is not stored.",
-    statement: "Statement to check", statementPh: "Paste your statement here", reference: "Reference text (optional)", referencePh: "Paste a template or reference text", aiBtn: "Analyze AI risk", simBtn: "Check similarity", empty: "Enter a statement first.", confidence: "Detection confidence", tooShort: "Enter at least 120 characters for a more reliable result.", privacy: "Your text is not sent or stored", detectorNote: "Supports Japanese, Chinese, and English",
+    statement: "Statement to check", statementPh: "Paste your statement here", reference: "Reference text (optional)", referencePh: "Paste a template or reference text", aiBtn: "Analyze AI risk", simBtn: "Check similarity", sample: "Use sample", inputNeeded: "Check your input", empty: "Enter a statement first.", referenceRequired: "Add a reference text before running the similarity check.", confidence: "Detection confidence", tooShort: "Enter at least 120 characters for a more reliable result.", privacy: "Your text is not sent or stored", detectorNote: "Supports Japanese, Chinese, and English", textStats: ["Language", "Characters", "Sentences"], languageNames: ["Japanese", "Chinese", "English", "Mixed / unknown"], sentencesUnit: "sentences",
     aiLabel: "AI-written likelihood", simLabel: "Text similarity", low: "Low", mid: "Moderate", high: "High", aiReason: "Estimated from writing consistency, formulaic phrasing, and the amount of specific personal detail.", simReason: "Compared long phrases within the statement and against the reference text you supplied.", disclaimer: "This is a reference signal, not proof of AI use or plagiarism, and it does not search the entire internet.",
     chars: "characters", clear: "Clear text", signals: "Signals found", suggestions: "How to improve", noSignals: "No prominent issues were found.",
     metricNames: ["Style uniformity", "Formulaic language", "Concrete details", "Personal voice", "Vocabulary diversity", "Repetition", "Reference overlap"],
@@ -81,7 +86,7 @@ const copy = {
     dataKicker: "大学数据", dataA: "不凭感觉，", dataB: "用数据选择大学。", dataBody: "整理募集要项、专业、EJU与英语要求和出愿时间，形成可执行的申请计划。",
     publicTitle: "所有人可查看", publicItems: ["募集要项与出愿时间", "专业与考试科目", "公开的合格率与倍率"], memberTitle: "课程学员限定", memberItems: ["大学分数定位分析", "过去问出题趋势", "个人选校与时间策略"],
     aiKicker: "志望理由书 AI DETECTOR", aiTitle: "志望理由书 AI 检测器", aiBody: "针对日本大学志望理由书，从文风、模板表达、具体程度和个人经历等维度检测AI生成风险。文章仅在浏览器中分析，不会保存。",
-    statement: "需要检查的志望理由书", statementPh: "请粘贴志望理由书", reference: "参考文章（选填）", referencePh: "请粘贴模板或参考文章", aiBtn: "分析 AI 风险", simBtn: "相似度检查", empty: "请先输入志望理由书。", confidence: "判定可信度", tooShort: "为提高准确度，请输入至少120字。", privacy: "输入内容不会上传或保存", detectorNote: "支持日语、中文和英语",
+    statement: "需要检查的志望理由书", statementPh: "请粘贴志望理由书", reference: "参考文章（选填）", referencePh: "请粘贴模板或参考文章", aiBtn: "分析 AI 风险", simBtn: "相似度检查", sample: "填入示例", inputNeeded: "请检查输入内容", empty: "请先输入志望理由书。", referenceRequired: "进行相似度检查前，请先填写参考文章。", confidence: "判定可信度", tooShort: "为提高准确度，请输入至少120字。", privacy: "输入内容不会上传或保存", detectorNote: "支持日语、中文和英语", textStats: ["文本语言", "字符数", "句子数"], languageNames: ["日语", "中文", "英语", "混合 / 未知"], sentencesUnit: "句",
     aiLabel: "AI生成的可能性", simLabel: "文章相似度", low: "较低", mid: "中等", high: "较高", aiReason: "根据行文一致性、模板表达和具体个人经历的数量估算。", simReason: "比较文章内部的长表达，并与您提供的参考文章进行对比。", disclaimer: "结果仅供参考，不能证明AI生成或抄袭，也不会搜索整个互联网。",
     chars: "字", clear: "清空内容", signals: "检测到的问题", suggestions: "修改建议", noSignals: "没有发现明显问题。",
     metricNames: ["文风一致性", "模板化表达", "具体信息", "个人表达", "词汇多样性", "文内重复", "参考文重合"],
@@ -97,6 +102,15 @@ const copy = {
 function normalizeText(value: string) { return value.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, ""); }
 function shingles(value: string, size = 9) { const clean = normalizeText(value); return Array.from({ length: Math.max(0, clean.length - size + 1) }, (_, i) => clean.slice(i, i + size)); }
 function clamp(value: number) { return Math.max(0, Math.min(100, Math.round(value))); }
+function detectLanguage(value: string) {
+  const japanese = (value.match(/[\p{Script=Hiragana}\p{Script=Katakana}]/gu) || []).length;
+  const han = (value.match(/\p{Script=Han}/gu) || []).length;
+  const latin = (value.match(/[a-z]/gi) || []).length;
+  if (japanese >= 3 && japanese >= latin * .2) return 0;
+  if (han >= 3 && han > latin) return 1;
+  if (latin >= 5 && latin > han) return 2;
+  return 3;
+}
 function tokens(value: string) {
   const latin = value.toLowerCase().match(/[a-z][a-z'-]*/g) || [];
   const cjk = (value.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー]+/gu) || []).flatMap(chunk => Array.from({ length: Math.max(1, chunk.length - 1) }, (_, index) => chunk.slice(index, index + 2)));
@@ -108,19 +122,26 @@ export default function Home() {
   const [statement, setStatement] = useState("");
   const [reference, setReference] = useState("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [toolError, setToolError] = useState("");
   const [uploads, setUploads] = useState<UploadedResource[]>([]);
   const [contactMessage, setContactMessage] = useState("");
   const t = copy[lang];
   const level = (score: number) => score >= 60 ? t.high : score >= 35 ? t.mid : t.low;
+  const sampleStatements: Record<Lang, string> = {
+    ja: "私は高校二年生のとき、地元商店街の空き店舗調査に参加しました。店主十五人に話を聞く中で、売上だけでは地域の価値を説明できないと気づきました。そこで来店理由と滞在時間を記録するアンケートを提案し、三人の仲間と二か月間調査しました。この経験から、人の行動をデータで捉え、地域政策につなげる経済学を学びたいと考えました。貴学の地域経済論とフィールドワークを通じて、地域の小規模事業者が継続できる仕組みを研究したいです。",
+    en: "During my second year of high school, I joined a survey of vacant shops in my local shopping district. After interviewing fifteen shop owners, I realized that sales figures alone could not explain the district's value. I proposed tracking visitors' reasons and time spent in the area, then conducted a two-month survey with three classmates. That experience made me want to study how behavioral data can inform regional economic policy. Through your fieldwork program, I hope to research practical ways for small local businesses to remain sustainable.",
+    zh: "高中二年级时，我参加了家乡商店街的空置店铺调查。在采访十五位店主的过程中，我发现只看销售额无法说明一个地区真正的价值。于是我提出记录顾客来访原因和停留时间，并和三位同学连续调查了两个月。这段经历让我希望学习如何用行为数据分析地区经济，并把研究结果用于实际政策。进入贵校后，我想通过地区经济课程和实地调查，研究帮助小型商户持续经营的方法。",
+  };
 
   useEffect(() => {
     fetch("/api/resources").then(response => response.ok ? response.json() : { resources: [] }).then((data: { resources?: UploadedResource[] }) => setUploads(data.resources || [])).catch(() => setUploads([]));
   }, []);
 
   function checkAI() {
-    if (!statement.trim()) return setResult({ label: t.aiLabel, score: 0, level: t.low, confidence: 0, confidenceLabel: t.confidence, reason: t.empty, metrics: [], flags: [], suggestions: [] });
+    if (!statement.trim()) { setResult(null); setToolError(t.empty); return; }
+    setToolError("");
     const cleanLength = normalizeText(statement).length;
-    const sentences = statement.split(/[。！？!?\.]+/).map(sentence => sentence.trim()).filter(Boolean);
+    const sentences = statement.split(/[。！？!?.]+/).map(sentence => sentence.trim()).filter(Boolean);
     const lengths = sentences.map(s => s.trim().length);
     const avg = lengths.reduce((a, b) => a + b, 0) / Math.max(1, lengths.length);
     const variation = avg ? Math.sqrt(lengths.reduce((a, b) => a + (b - avg) ** 2, 0) / Math.max(1, lengths.length)) / avg : 0;
@@ -141,24 +162,29 @@ export default function Home() {
     const score = clamp(50 + (evidenceScore - 50) * (0.35 + confidence / 155));
     const flags = [cleanLength < 120 ? t.tooShort : "", sentenceUniformity > 76 && sentences.length >= 4 ? t.flagTexts[0] : "", formulaRisk > 38 ? t.flagTexts[1] : "", detailStrength < 32 ? t.flagTexts[2] : "", repetitionRisk > 24 ? t.flagTexts[3] : "", personalVoice < 28 ? t.flagTexts[5] : "", vocabularyStrength < 25 && allTokens.length > 35 ? t.flagTexts[6] : ""].filter(Boolean);
     const suggestions = [detailStrength < 55 ? t.advice[0] : "", detailStrength < 45 ? t.advice[1] : "", sentenceUniformity > 72 ? t.advice[2] : "", formulaRisk > 30 ? t.advice[3] : "", personalVoice < 40 ? t.advice[5] : "", vocabularyStrength < 30 ? t.advice[6] : ""].filter(Boolean).slice(0, 4);
-    setResult({ label: t.aiLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, reason: cleanLength < 120 ? t.tooShort : t.aiReason, metrics: [{ label: t.metricNames[0], value: sentenceUniformity }, { label: t.metricNames[1], value: formulaRisk }, { label: t.metricNames[2], value: detailStrength, positive: true }, { label: t.metricNames[3], value: personalVoice, positive: true }, { label: t.metricNames[4], value: vocabularyStrength, positive: true }, { label: t.metricNames[5], value: repetitionRisk }], flags, suggestions });
+    setResult({ label: t.aiLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, language: t.languageNames[detectLanguage(statement)], characters: cleanLength, sentenceCount: sentences.length, reason: cleanLength < 120 ? t.tooShort : t.aiReason, metrics: [{ label: t.metricNames[0], value: sentenceUniformity }, { label: t.metricNames[1], value: formulaRisk }, { label: t.metricNames[2], value: detailStrength, positive: true }, { label: t.metricNames[3], value: personalVoice, positive: true }, { label: t.metricNames[4], value: vocabularyStrength, positive: true }, { label: t.metricNames[5], value: repetitionRisk }], flags, suggestions });
   }
 
   function checkSimilarity() {
-    if (!statement.trim()) return setResult({ label: t.simLabel, score: 0, level: t.low, confidence: 0, confidenceLabel: t.confidence, reason: t.empty, metrics: [], flags: [], suggestions: [] });
+    if (!statement.trim()) { setResult(null); setToolError(t.empty); return; }
+    if (!reference.trim()) { setResult(null); setToolError(t.referenceRequired); return; }
+    setToolError("");
     const source = shingles(statement); const unique = new Set(source);
     const repeated = source.length ? 1 - unique.size / source.length : 0;
     const internalScore = clamp(repeated * 180);
     let referenceScore = 0;
     if (reference.trim()) { const other = new Set(shingles(reference)); const matches = [...unique].filter(x => other.has(x)).length; referenceScore = clamp(matches / Math.max(1, Math.min(unique.size, other.size)) * 100); }
-    const score = reference.trim() ? referenceScore : internalScore;
+    const score = referenceScore;
     const flags = [internalScore > 24 ? t.flagTexts[3] : "", referenceScore > 18 ? t.flagTexts[4] : ""].filter(Boolean);
     const suggestions = [internalScore > 24 ? t.advice[3] : "", referenceScore > 18 ? t.advice[4] : ""].filter(Boolean);
-    const confidence = clamp(Math.min(normalizeText(statement).length / 4, 80) + (reference.trim() ? 20 : 5));
-    setResult({ label: t.simLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, reason: t.simReason, metrics: [{ label: t.metricNames[5], value: internalScore }, { label: t.metricNames[6], value: referenceScore }], flags, suggestions });
+    const cleanLength = normalizeText(statement).length;
+    const sentenceCount = statement.split(/[。！？!?.]+/).filter(Boolean).length;
+    const confidence = clamp(Math.min(cleanLength / 4, 80) + 20);
+    setResult({ label: t.simLabel, score, level: level(score), confidence, confidenceLabel: t.confidence, language: t.languageNames[detectLanguage(statement)], characters: cleanLength, sentenceCount, reason: t.simReason, metrics: [{ label: t.metricNames[5], value: internalScore }, { label: t.metricNames[6], value: referenceScore }], flags, suggestions });
   }
 
-  function clearTool() { setStatement(""); setReference(""); setResult(null); }
+  function clearTool() { setStatement(""); setReference(""); setResult(null); setToolError(""); }
+  function useSample() { setStatement(sampleStatements[lang]); setReference(""); setResult(null); setToolError(""); }
 
   const cards = useMemo(() => t.cards, [t]);
   const exams = uploads.filter(item => item.resourceKind === "exam");
@@ -171,23 +197,23 @@ export default function Home() {
   }
 
   return <main>
-    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => setLang(e.target.value as Lang)}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
+    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => { setLang(e.target.value as Lang); setResult(null); setToolError(""); }}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
 
     <section className="hero" id="top"><div><p className="kicker">{t.eyebrow}</p><h1>{t.heroA}<em>{t.heroB}</em></h1><p className="lead">{t.lead}</p><a className="button" href="#free">{t.free} ↓</a><div className="proof">{t.proof.map(x => <span key={x}>✓ {x}</span>)}</div></div><div className="hero-stack">{cards.map(card => <a href="#resources" key={card[0]}><span>{card[0]}</span><div><small>EBI RESOURCE</small><h2>{card[1]}</h2><p>{card[2]}</p></div><b>→</b></a>)}</div></section>
 
-    <section className="paper section" id="resources"><div className="section-head"><h2>{t.areas}</h2><p>{t.areaLead}</p></div><article className="free-card" id="free"><div className="free-art"><small>FREE LESSON</small><strong>聴<br/>読</strong><img src="/ebi-icon.png" alt=""/></div><div className="free-copy"><span>FREE EJU RESOURCE</span><h2>{t.freeTitle}</h2><p>{t.freeBody}</p><ul>{t.freeList.map(x => <li key={x}>✓ {x}</li>)}</ul><div><button className="button">{t.free} ▶</button><a href="#contact">{t.join} ↗</a></div></div></article><div className="resource-grid">{cards.map(card => <article key={card[0]}><span>{card[0]}</span><h3>{card[1]}</h3><p>{card[2]}</p><a href="#contact">{card[3]} →</a></article>)}</div></section>
+    <section className="paper section" id="resources"><div className="section-head"><h2>{t.areas}</h2><p>{t.areaLead}</p></div><article className="free-card" id="free"><div className="free-art"><small>FREE LESSON</small><strong>聴<br/>読</strong><img src="/ebi-icon.png" alt="" width="130" height="130"/></div><div className="free-copy"><span>FREE EJU RESOURCE</span><h2>{t.freeTitle}</h2><p>{t.freeBody}</p><ul>{t.freeList.map(x => <li key={x}>✓ {x}</li>)}</ul><div><button className="button">{t.free} ▶</button><a href="#contact">{t.join} ↗</a></div></div></article><div className="resource-grid">{cards.map(card => <article key={card[0]}><span>{card[0]}</span><h3>{card[1]}</h3><p>{card[2]}</p><a href="#contact">{card[3]} →</a></article>)}</div></section>
 
     <section className="exam-shop section" id="past-exams"><div className="section-head"><div><p className="kicker">{t.examKicker}</p><h2>{t.examTitle}</h2></div><p>{t.examLead}</p></div>{exams.length ? <div className="exam-grid">{exams.map(item => <article key={item.id}><div className="exam-card-top"><span>{item.examYear}</span><small>{item.subject}</small></div><p className="exam-school">{item.schoolName}</p><h3>{item.title}</h3><p className="exam-meta">{[item.faculty, item.category].filter(Boolean).join(" · ")}</p><p className="exam-description">{item.description || t.protected}</p><div className="exam-price"><strong>¥{item.priceYen.toLocaleString()}</strong><small>{t.yen}</small></div><p className="protected-note">🔒 {t.protected}</p><div className="exam-actions">{item.previewUrl && <a href={item.previewUrl} target="_blank" rel="noreferrer">{t.preview} ↗</a>}{item.purchaseUrl ? <a className="button copper" href={item.purchaseUrl} target="_blank" rel="noreferrer">{t.buy} →</a> : <button className="button copper" onClick={() => inquireAbout(item)}>{t.inquire} →</button>}</div></article>)}</div> : <div className="exam-empty"><span>過去問</span><p>{t.examEmpty}</p></div>}</section>
 
     <section className="dark section" id="data"><div className="section-head"><div><p className="kicker">{t.dataKicker}</p><h2>{t.dataA}<em>{t.dataB}</em></h2></div><p>{t.dataBody}</p></div><div className="metrics"><div><b>132+</b><span>UNIVERSITIES</span></div><div><b>148+</b><span>PROGRAMS</span></div><div><b>2026</b><span>DATA VERSION</span></div></div><div className="data-grid"><article><small>PUBLIC</small><h3>{t.publicTitle}</h3><ul>{t.publicItems.map(x => <li key={x}>✓ {x}</li>)}</ul></article><article className="member"><small>CLASS MEMBERS</small><h3>{t.memberTitle}</h3><ul>{t.memberItems.map(x => <li key={x}>◇ {x}</li>)}</ul><a href="#contact" className="button">{t.consult} ↗</a></article></div></section>
 
-    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="detector-badges"><span>✓ {t.privacy}</span><span>✓ {t.detectorNote}</span></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} {t.chars}</span><textarea value={statement} onChange={e => { setStatement(e.target.value); setResult(null); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result">{result ? <div className="analysis"><div className="score"><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><div className="confidence"><span>{result.confidenceLabel}</span><i><b style={{width: `${result.confidence}%`}}/></i><strong>{result.confidence}%</strong></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p><div className="placeholder-lines"><span/><span/><span/></div></div>}</div></div></section>
+    <section className="lab section" id="ai"><div className="section-head"><div><p className="kicker">{t.aiKicker}</p><h2>{t.aiTitle}</h2></div><p>{t.aiBody}</p></div><div className="detector-badges"><span>✓ {t.privacy}</span><span>✓ {t.detectorNote}</span></div><div className="tool"><div className="tool-form"><label>{t.statement}<span className="char-count">{statement.length} / 8,000 {t.chars}</span><textarea maxLength={8000} value={statement} onChange={e => { setStatement(e.target.value); setResult(null); setToolError(""); }} placeholder={t.statementPh}/></label><label>{t.reference}<textarea maxLength={8000} className="reference" value={reference} onChange={e => { setReference(e.target.value); setResult(null); setToolError(""); }} placeholder={t.referencePh}/></label><div className="tool-actions"><button onClick={checkAI}>{t.aiBtn}</button><button onClick={checkSimilarity}>{t.simBtn}</button><button className="secondary" onClick={useSample}>{t.sample}</button><button className="clear" onClick={clearTool}>{t.clear}</button></div></div><div className="tool-result" role="status" aria-live="polite">{result ? <div className="analysis"><div className={`score risk-${result.score >= 60 ? "high" : result.score >= 35 ? "medium" : "low"}`}><span>{result.label}</span><strong>{result.score}%</strong><b>{result.level}</b></div><div className="result-facts"><div><span>{t.textStats[0]}</span><strong>{result.language}</strong></div><div><span>{t.textStats[1]}</span><strong>{result.characters}</strong></div><div><span>{t.textStats[2]}</span><strong>{result.sentenceCount} {t.sentencesUnit}</strong></div></div><div className="confidence"><span>{result.confidenceLabel}</span><i role="progressbar" aria-label={result.confidenceLabel} aria-valuemin={0} aria-valuemax={100} aria-valuenow={result.confidence}><b style={{width: `${result.confidence}%`}}/></i><strong>{result.confidence}%</strong></div><p>{result.reason}</p>{result.metrics.length > 0 && <div className="metric-list">{result.metrics.map(metric => <div className={metric.positive ? "positive" : ""} key={metric.label}><span>{metric.label}</span><i role="progressbar" aria-label={metric.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={metric.value}><b style={{width: `${metric.value}%`}}/></i><em>{metric.value}%</em></div>)}</div>}<div className="finding-grid"><div><h3>{t.signals}</h3>{result.flags.length ? <ul>{result.flags.map(x => <li key={x}>◆ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div><div><h3>{t.suggestions}</h3>{result.suggestions.length ? <ul>{result.suggestions.map(x => <li key={x}>→ {x}</li>)}</ul> : <p>{t.noSignals}</p>}</div></div><small>{t.disclaimer}</small></div> : toolError ? <div className="tool-error"><b>!</b><h3>{t.inputNeeded}</h3><p>{toolError}</p></div> : <div className="placeholder"><b>AI?</b><p>{t.aiBody}</p><div className="placeholder-lines" aria-hidden="true"><span/><span/><span/></div></div>}</div></div></section>
 
     <section className="uploads section" id="downloads"><div className="section-head"><div><p className="kicker">{t.uploadKicker}</p><h2>{t.uploadTitle}</h2></div><p>{t.uploadLead}</p></div>{studyUploads.length ? <div className="upload-grid">{studyUploads.map(item => <article key={item.id}><div className="upload-type">{item.fileName.split(".").pop()?.toUpperCase()}</div><small>{item.category} · {(item.sizeBytes / 1024 / 1024).toFixed(1)} MB</small><h3>{item.title}</h3><p>{item.description || item.fileName}</p>{item.downloadUrl ? <a className="button" href={item.downloadUrl}>{t.download} ↓</a> : <a className="button copper" href="#contact">{t.groupOnly} ↗</a>}</article>)}</div> : <div className="upload-empty">{t.noUploads}</div>}</section>
 
     <section className="paper section services"><div className="section-head"><h2>{t.services}</h2></div><div className="service-grid">{t.serviceCards.map((x, i) => <article key={x[0]}><span>0{i + 1}</span><h3>{x[0]}</h3><p>{x[1]}</p><a href="#contact">{t.consult} →</a></article>)}</div></section>
 
     <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={e => e.preventDefault()}><label>{t.name}<input required/></label><label>{t.email}<input type="email" required/></label><label>{t.message}<textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)}/></label><button className="button">{t.send} ↗</button></form></section>
-    <footer><div className="brand"><img src="/ebi-icon.png" alt=""/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN · <a href="/admin">{t.admin}</a></span></footer>
+    <footer><div className="brand"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN · <Link href="/admin">{t.admin}</Link></span></footer>
   </main>;
 }

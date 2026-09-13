@@ -624,6 +624,11 @@ footer {
 .tool-actions button:nth-child(2) {
   background: var(--copper);
 }
+.tool-actions button.secondary {
+  background: white;
+  color: var(--forest);
+  border: 1px solid var(--forest);
+}
 .tool-actions button.clear {
   margin-left: auto;
   background: transparent;
@@ -637,6 +642,40 @@ footer {
 .analysis {
   width: 100%;
 }
+.score {
+  position: relative;
+}
+.score::before {
+  content: "";
+  position: absolute;
+  left: -45px;
+  top: -45px;
+  bottom: -1px;
+  width: 5px;
+  background: #e5906d;
+}
+.score.risk-low::before { background: #72a98a; }
+.score.risk-medium::before { background: #e1a85b; }
+.score.risk-high::before { background: #d96b57; }
+.score.risk-low strong { color: #8fc4a7; }
+.score.risk-medium strong { color: #efbb70; }
+.score.risk-high strong { color: #ed826d; }
+.result-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid #53615c;
+}
+.result-facts > div {
+  min-width: 0;
+  padding: 14px 12px;
+  border-right: 1px solid #53615c;
+}
+.result-facts > div:first-child { padding-left: 0; }
+.result-facts > div:last-child { border-right: 0; }
+.result-facts span,
+.result-facts strong { display: block; overflow-wrap: anywhere; }
+.result-facts span { margin-bottom: 5px; color: #91a19b; font-size: 8px; }
+.result-facts strong { color: white; font-size: 11px; }
 .analysis > p {
   line-height: 1.7;
   color: #c2cbc7;
@@ -720,6 +759,24 @@ footer {
 .placeholder-lines span { display: block; height: 4px; margin: 9px 0; background: #40524c; }
 .placeholder-lines span:nth-child(2) { width: 78%; }
 .placeholder-lines span:nth-child(3) { width: 55%; }
+.tool-error {
+  min-height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+.tool-error > b {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+  border: 1px solid #d99b70;
+  color: #efbb70;
+  font: 700 24px Georgia, serif;
+}
+.tool-error h3 { margin: 0 0 8px; font-size: 15px; }
+.tool-error p { max-width: 340px; margin: 0; color: #c7d0cc; font-size: 11px; line-height: 1.7; }
 @media (max-width: 950px) {
   .tool {
     grid-template-columns: 1fr;
@@ -734,6 +791,22 @@ footer {
   }
   .metric-list > div {
     grid-template-columns: 115px 1fr 34px;
+  }
+  .result-facts {
+    grid-template-columns: 1fr;
+  }
+  .result-facts > div,
+  .result-facts > div:first-child {
+    padding: 10px 0;
+    border-right: 0;
+    border-bottom: 1px solid #53615c;
+  }
+  .result-facts > div:last-child {
+    border-bottom: 0;
+  }
+  .score::before {
+    left: -22px;
+    top: -28px;
   }
 }
 

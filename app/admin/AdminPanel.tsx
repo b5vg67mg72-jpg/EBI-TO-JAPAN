@@ -1,5 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- vinext's next/image shim causes client hook errors. */
 
+import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
 type Resource = {
@@ -26,7 +28,12 @@ export default function AdminPanel() {
     setResources(data.resources); setLoading(false);
   }, []);
 
-  useEffect(() => { loadResources().catch(error => { setMessage(error.message); setLoading(false); }); }, [loadResources]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      void loadResources().catch(error => { setMessage(error.message); setLoading(false); });
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [loadResources]);
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("正在上传，请不要关闭页面……");
@@ -61,7 +68,7 @@ export default function AdminPanel() {
   }
 
   return <main className="admin-shell">
-    <header className="admin-header"><a className="brand" href="/"><img src="/ebi-icon.png" alt=""/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></a><div><span>管理员模式</span><a href="/">查看网站</a><button className="link-button" onClick={logout}>退出登录</button></div></header>
+    <header className="admin-header"><Link className="brand" href="/"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></Link><div><span>管理员模式</span><Link href="/">查看网站</Link><button className="link-button" onClick={logout}>退出登录</button></div></header>
     <section className="admin-hero"><p>EBI ADMIN MODE</p><h1>学习资料与校内考真题，一站管理。</h1><p>上传普通学习资料，或创建带价格、试看文件和付款链接的校内考真题商品。设置为“已发布”后会立即显示在网站。</p></section>
     <section className="admin-grid">
       <form className="upload-card" onSubmit={upload}>

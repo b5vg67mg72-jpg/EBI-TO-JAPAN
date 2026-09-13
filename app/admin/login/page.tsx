@@ -1,5 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- vinext's next/image shim causes client hook errors. */
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 export default function AdminLogin() {
@@ -12,5 +14,5 @@ export default function AdminLogin() {
     if (response.ok) window.location.href = "/admin";
     else { const data = await response.json() as { error?: string }; setError(data.error || "登录失败"); setBusy(false); }
   }
-  return <main className="admin-login"><section><a className="brand" href="/"><img src="/ebi-icon.png" alt=""/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></a><p className="kicker">ADMINISTRATOR ACCESS</p><h1>管理员登录</h1><p>请输入管理员密码，登录后即可上传和管理网站资料。</p><form onSubmit={submit}><label>管理员密码<input name="password" type="password" autoComplete="current-password" required autoFocus/></label><button disabled={busy}>{busy ? "正在验证……" : "登录后台"}</button>{error && <div className="login-error" role="alert">{error}</div>}</form><a className="back-site" href="/">← 返回公开网站</a></section></main>;
+  return <main className="admin-login"><section><Link className="brand" href="/"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Resource Admin</b><small>资料管理后台</small></span></Link><p className="kicker">ADMINISTRATOR ACCESS</p><h1>管理员登录</h1><p>请输入管理员密码，登录后即可上传和管理网站资料。</p><form onSubmit={submit}><label>管理员密码<input name="password" type="password" autoComplete="current-password" required/></label><button disabled={busy}>{busy ? "正在验证……" : "登录后台"}</button>{error && <div className="login-error" role="alert">{error}</div>}</form><Link className="back-site" href="/">← 返回公开网站</Link></section></main>;
 }
