@@ -1,8 +1,8 @@
-# vinext-starter
+# EBI-TO-JAPAN
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+A multilingual study portal for students preparing to enter Japanese universities.
+It includes EJU resources, paid university entrance past exams, an AI-assisted
+statement checker, consultation intake, and an authenticated resource admin panel.
 
 ## Prerequisites
 

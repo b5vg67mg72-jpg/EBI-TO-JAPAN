@@ -496,6 +496,19 @@ select {
 .contact textarea {
   height: 90px;
 }
+.contact .contact-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.contact button:disabled { opacity: .65; cursor: wait; }
+.contact-feedback { margin: 16px 0 0; padding: 12px 14px; font-size: 11px; line-height: 1.6; }
+.contact form .contact-feedback.sent { color: #28543f; background: #e5f1e8; }
+.contact form .contact-feedback.error { color: #933b2c; background: #fff0eb; }
 footer {
   padding: 45px 6vw;
   background: #0f1c18;
@@ -855,7 +868,13 @@ footer {
 .admin-hero h1 { max-width: 850px; margin: 18px 0; font: 500 clamp(35px, 5vw, 62px)/1.25 Georgia, "Noto Serif JP", serif; }
 .admin-hero > p:last-child { max-width: 720px; color: #b8c5c0; line-height: 1.8; }
 .admin-grid { padding: 45px 7vw 90px; display: grid; grid-template-columns: minmax(330px, .75fr) minmax(480px, 1.25fr); gap: 28px; align-items: start; }
-.upload-card, .library-card { background: white; border: 1px solid var(--line); padding: 34px; }
+.upload-card, .library-card, .contact-card { background: white; border: 1px solid var(--line); padding: 34px; }
+.contact-card { grid-column: 1 / -1; }
+.contact-list article { display: grid; grid-template-columns: minmax(180px, .35fr) 1fr; gap: 28px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.contact-list article:last-child { border-bottom: 0; }
+.contact-list h3 { margin: 0 0 5px; font-size: 15px; }
+.contact-list a, .contact-list time { display: block; margin-top: 5px; color: var(--copper); font-size: 9px; }
+.contact-list p { margin: 0; color: var(--muted); line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .admin-title { display: flex; gap: 15px; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 25px; }
 .admin-title > span { color: var(--copper); font-size: 11px; }
 .admin-title h2 { margin: 0; font: 700 27px Georgia, "Noto Serif JP", serif; }
@@ -912,7 +931,8 @@ footer {
   .admin-header > div { flex-direction: column; align-items: flex-end; gap: 7px; }
   .admin-hero { padding: 50px 5vw 40px; }
   .admin-grid { padding: 25px 5vw 60px; }
-  .upload-card, .library-card { padding: 22px; }
+  .upload-card, .library-card, .contact-card { padding: 22px; }
+  .contact-list article { grid-template-columns: 1fr; gap: 12px; }
   .admin-fields { grid-template-columns: 1fr; }
   .admin-list article { grid-template-columns: 45px 1fr; }
   .file-actions { grid-column: 1 / -1; flex-direction: row; }

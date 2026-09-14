@@ -27,3 +27,11 @@ export const resources = sqliteTable("resources", {
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 }, (table) => [index("idx_resources_status_created").on(table.status, table.createdAt)]);
+
+export const contactSubmissions = sqliteTable("contact_submissions", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  message: text("message").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [index("idx_contact_submissions_created").on(table.createdAt)]);

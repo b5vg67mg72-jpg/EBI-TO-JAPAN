@@ -11,21 +11,29 @@ type Resource = {
   subject: string; price_yen: number; purchase_url: string; preview_name: string | null;
   content_type: string; size_bytes: number; created_at: number;
 };
+type Contact = { id: string; name: string; email: string; message: string; created_at: number };
 
 const formatBytes = (value: number) => value >= 1024 * 1024 ? `${(value / 1024 / 1024).toFixed(1)} MB` : `${Math.ceil(value / 1024)} KB`;
 
 export default function AdminPanel() {
   const [resources, setResources] = useState<Resource[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [resourceKind, setResourceKind] = useState<"study" | "exam">("study");
 
   const loadResources = useCallback(async () => {
-    const response = await fetch("/api/admin/resources", { cache: "no-store" });
-    if (!response.ok) throw new Error("无法读取资料列表");
-    const data = await response.json() as { resources: Resource[] };
-    setResources(data.resources); setLoading(false);
+    const [resourceResponse, contactResponse] = await Promise.all([
+      fetch("/api/admin/resources", { cache: "no-store" }),
+      fetch("/api/admin/contacts", { cache: "no-store" }),
+    ]);
+    if (!resourceResponse.ok || !contactResponse.ok) throw new Error("无法读取后台数据");
+    const [resourceData, contactData] = await Promise.all([
+      resourceResponse.json() as Promise<{ resources: Resource[] }>,
+      contactResponse.json() as Promise<{ contacts: Contact[] }>,
+    ]);
+    setResources(resourceData.resources); setContacts(contactData.contacts); setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -49,22 +57,28 @@ export default function AdminPanel() {
 
   async function update(resource: Resource, changes: Partial<Pick<Resource, "status" | "access_level">>) {
     setBusy(true); setMessage("正在更新……");
-    const response = await fetch("/api/admin/resources", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resource.id, status: changes.status ?? resource.status, accessLevel: changes.access_level ?? resource.access_level }) });
-    if (response.ok) { setMessage("已更新。"); await loadResources(); } else setMessage("更新失败。");
-    setBusy(false);
+    try {
+      const response = await fetch("/api/admin/resources", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resource.id, status: changes.status ?? resource.status, accessLevel: changes.access_level ?? resource.access_level }) });
+      if (!response.ok) throw new Error("更新失败。");
+      setMessage("已更新。"); await loadResources();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "更新失败。"); }
+    finally { setBusy(false); }
   }
 
   async function remove(resource: Resource) {
     if (!confirm(`确定删除「${resource.title}」吗？文件也会永久删除。`)) return;
     setBusy(true); setMessage("正在删除……");
-    const response = await fetch("/api/admin/resources", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resource.id }) });
-    if (response.ok) { setMessage("已删除。"); await loadResources(); } else setMessage("删除失败。");
-    setBusy(false);
+    try {
+      const response = await fetch("/api/admin/resources", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resource.id }) });
+      if (!response.ok) throw new Error("删除失败。");
+      setMessage("已删除。"); await loadResources();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "删除失败。"); }
+    finally { setBusy(false); }
   }
 
   async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    window.location.href = "/";
+    try { await fetch("/api/admin/logout", { method: "POST" }); }
+    finally { window.location.href = "/"; }
   }
 
   return <main className="admin-shell">
@@ -83,6 +97,7 @@ export default function AdminPanel() {
         <button disabled={busy}>{busy ? "处理中……" : "上传并保存"}</button>{message && <p className="admin-message" role="status">{message}</p>}
       </form>
       <div className="library-card"><div className="admin-title"><span>02</span><div><h2>资料与商品库</h2><p>{resources.length} 个文件</p></div></div>{loading ? <p>正在读取……</p> : resources.length === 0 ? <div className="empty-library">还没有上传资料。</div> : <div className="admin-list">{resources.map(resource => <article key={resource.id}><div className={`file-badge ${resource.resource_kind === "exam" ? "paid" : ""}`}>{resource.resource_kind === "exam" ? "真题" : resource.file_name.split(".").pop()?.toUpperCase()}</div><div className="file-info"><small>{resource.resource_kind === "exam" ? `${resource.school_name} · ${resource.exam_year} · ¥${resource.price_yen.toLocaleString()}` : `${resource.category} · ${formatBytes(resource.size_bytes)}`}</small><h3>{resource.title}</h3><p>{resource.resource_kind === "exam" ? `${resource.faculty || "学部未填写"} · ${resource.subject}${resource.preview_name ? " · 有试看" : ""}` : resource.file_name}</p><div><span className={resource.status}>{resource.status === "published" ? "已发布" : "草稿"}</span><span>{resource.resource_kind === "exam" ? "付费商品" : resource.access_level === "public" ? "公开下载" : "学习群限定"}</span></div></div><div className="file-actions"><button disabled={busy} onClick={() => update(resource, { status: resource.status === "published" ? "draft" : "published" })}>{resource.status === "published" ? "撤下" : "发布"}</button>{resource.resource_kind !== "exam" && <button disabled={busy} onClick={() => update(resource, { access_level: resource.access_level === "public" ? "group" : "public" })}>切换权限</button>}<button className="danger" disabled={busy} onClick={() => remove(resource)}>删除</button></div></article>)}</div>}</div>
+      <div className="contact-card"><div className="admin-title"><span>03</span><div><h2>最新咨询</h2><p>{contacts.length} 条记录</p></div></div>{loading ? <p>正在读取……</p> : contacts.length === 0 ? <div className="empty-library">还没有收到咨询。</div> : <div className="contact-list">{contacts.map(contact => <article key={contact.id}><div><h3>{contact.name}</h3><a href={`mailto:${contact.email}`}>{contact.email}</a><time dateTime={new Date(contact.created_at).toISOString()}>{new Date(contact.created_at).toLocaleString("zh-CN")}</time></div><p>{contact.message}</p></article>)}</div>}</div>
     </section>
   </main>;
 }

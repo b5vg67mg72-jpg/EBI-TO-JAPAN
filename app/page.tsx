@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- vinext's next/image shim causes client hook errors. */
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type Lang = "ja" | "en" | "zh";
 type AnalysisResult = {
@@ -52,7 +52,7 @@ const copy = {
     uploadKicker: "NEW RESOURCES", uploadTitle: "最新の学習資料", uploadLead: "管理者が追加した教材は、公開後すぐにここへ表示されます。", download: "ダウンロード", groupOnly: "学習グループで受け取る", noUploads: "新しい公開資料は準備中です。", admin: "管理者ログイン",
     examKicker: "PAST EXAM SHOP", examTitle: "大学別・校内考の過去問", examLead: "大学・学部・年度・科目から必要な過去問を選べます。購入前に商品情報とサンプルをご確認ください。", examEmpty: "校内考の過去問商品は準備中です。", preview: "サンプルを見る", buy: "購入する", inquire: "購入について問い合わせる", yen: "円", protected: "購入後に完全版をご案内します。",
     services: "学習と進学を、一つの流れで支える。", serviceCards: [["EJU月額講座", "精聴・精読、学習計画、質問対応"], ["マンツーマン指導", "苦手科目と大学独自試験の準備"], ["大学受験総合プラン", "大学選び、出願書類、志望理由書、面接"]],
-    contactTitle: "日本への一歩、ここから。", contactBody: "まだ何も決まっていなくても大丈夫。まずは、あなたの話を聞かせてください。", name: "お名前", email: "メールアドレス", message: "相談したい内容", send: "無料相談を予約する",
+    contactTitle: "日本への一歩、ここから。", contactBody: "まだ何も決まっていなくても大丈夫。まずは、あなたの話を聞かせてください。", name: "お名前", email: "メールアドレス", message: "相談したい内容", send: "無料相談を予約する", sending: "送信中…", sent: "お問い合わせを受け付けました。担当者からご連絡します。", sendError: "送信できませんでした。時間をおいてもう一度お試しください。", freeRequest: "無料EJU動画の視聴を希望します。",
   },
   en: {
     nav: ["EJU Resources", "Recorded Classes", "English Prep", "Past Exams", "University Data", "AI Tools"], consult: "Free consultation",
@@ -75,7 +75,7 @@ const copy = {
     uploadKicker: "NEW RESOURCES", uploadTitle: "Latest study materials", uploadLead: "Materials added by the administrator appear here as soon as they are published.", download: "Download", groupOnly: "Get it in the study group", noUploads: "New public resources are being prepared.", admin: "Administrator login",
     examKicker: "PAST EXAM SHOP", examTitle: "University entrance past exams", examLead: "Browse by university, faculty, year, and subject. Review the item details and sample before purchasing.", examEmpty: "Past-exam products are being prepared.", preview: "View sample", buy: "Buy now", inquire: "Ask to purchase", yen: "JPY", protected: "The complete file is provided after purchase.",
     services: "Learning and admissions support in one clear path.", serviceCards: [["Monthly EJU Course", "Listening, reading, planning, and Q&A"], ["One-to-one Tutoring", "Weak subjects and university-specific exams"], ["Complete Admissions Plan", "University choice, documents, statement, and interview"]],
-    contactTitle: "Your first step toward Japan starts here.", contactBody: "It is okay if nothing is decided yet. Tell us where you are and what you need.", name: "Name", email: "Email", message: "How can we help?", send: "Book a free consultation",
+    contactTitle: "Your first step toward Japan starts here.", contactBody: "It is okay if nothing is decided yet. Tell us where you are and what you need.", name: "Name", email: "Email", message: "How can we help?", send: "Book a free consultation", sending: "Sending…", sent: "Thank you. Your request has been received and our team will contact you.", sendError: "Your request could not be sent. Please try again shortly.", freeRequest: "I would like access to the free EJU lesson.",
   },
   zh: {
     nav: ["EJU资料", "录播课程", "英语备考", "校内考真题", "大学信息", "AI工具"], consult: "免费咨询",
@@ -95,7 +95,7 @@ const copy = {
     uploadKicker: "最新资料", uploadTitle: "最新学习资料", uploadLead: "管理员上传并发布后，资料会立即显示在这里，不需要重新部署网站。", download: "下载资料", groupOnly: "加入学习群获取", noUploads: "新的公开资料正在准备中。", admin: "管理员登录",
     examKicker: "校内考真题商城", examTitle: "大学校内考往年真题", examLead: "可按大学、学部、年度和科目查看真题。购买前请确认商品信息，并可先查看试看文件。", examEmpty: "校内考真题商品正在准备中。", preview: "查看试看", buy: "立即购买", inquire: "咨询购买", yen: "日元", protected: "购买后获取完整真题文件。",
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
-    contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询",
+    contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询", sending: "正在发送…", sent: "已收到您的咨询，工作人员会尽快与您联系。", sendError: "发送失败，请稍后重试。", freeRequest: "我想领取免费的EJU课程。",
   },
 } as const;
 
@@ -125,6 +125,7 @@ export default function Home() {
   const [toolError, setToolError] = useState("");
   const [uploads, setUploads] = useState<UploadedResource[]>([]);
   const [contactMessage, setContactMessage] = useState("");
+  const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const t = copy[lang];
   const level = (score: number) => score >= 60 ? t.high : score >= 35 ? t.mid : t.low;
   const sampleStatements: Record<Lang, string> = {
@@ -136,6 +137,10 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/resources").then(response => response.ok ? response.json() : { resources: [] }).then((data: { resources?: UploadedResource[] }) => setUploads(data.resources || [])).catch(() => setUploads([]));
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+  }, [lang]);
 
   function checkAI() {
     if (!statement.trim()) { setResult(null); setToolError(t.empty); return; }
@@ -196,12 +201,34 @@ export default function Home() {
     requestAnimationFrame(() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }));
   }
 
+  function requestFreeLesson() {
+    setContactMessage(t.freeRequest);
+    setContactState("idle");
+    requestAnimationFrame(() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }));
+  }
+
+  async function submitContact(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setContactState("sending");
+    const form = event.currentTarget;
+    try {
+      const response = await fetch("/api/contact", { method: "POST", body: new FormData(form) });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(data.error || t.sendError);
+      form.reset();
+      setContactMessage("");
+      setContactState("sent");
+    } catch {
+      setContactState("error");
+    }
+  }
+
   return <main>
     <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => { setLang(e.target.value as Lang); setResult(null); setToolError(""); }}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
 
     <section className="hero" id="top"><div><p className="kicker">{t.eyebrow}</p><h1>{t.heroA}<em>{t.heroB}</em></h1><p className="lead">{t.lead}</p><a className="button" href="#free">{t.free} ↓</a><div className="proof">{t.proof.map(x => <span key={x}>✓ {x}</span>)}</div></div><div className="hero-stack">{cards.map(card => <a href="#resources" key={card[0]}><span>{card[0]}</span><div><small>EBI RESOURCE</small><h2>{card[1]}</h2><p>{card[2]}</p></div><b>→</b></a>)}</div></section>
 
-    <section className="paper section" id="resources"><div className="section-head"><h2>{t.areas}</h2><p>{t.areaLead}</p></div><article className="free-card" id="free"><div className="free-art"><small>FREE LESSON</small><strong>聴<br/>読</strong><img src="/ebi-icon.png" alt="" width="130" height="130"/></div><div className="free-copy"><span>FREE EJU RESOURCE</span><h2>{t.freeTitle}</h2><p>{t.freeBody}</p><ul>{t.freeList.map(x => <li key={x}>✓ {x}</li>)}</ul><div><button className="button">{t.free} ▶</button><a href="#contact">{t.join} ↗</a></div></div></article><div className="resource-grid">{cards.map(card => <article key={card[0]}><span>{card[0]}</span><h3>{card[1]}</h3><p>{card[2]}</p><a href="#contact">{card[3]} →</a></article>)}</div></section>
+    <section className="paper section" id="resources"><div className="section-head"><h2>{t.areas}</h2><p>{t.areaLead}</p></div><article className="free-card" id="free"><div className="free-art"><small>FREE LESSON</small><strong>聴<br/>読</strong><img src="/ebi-icon.png" alt="" width="130" height="130"/></div><div className="free-copy"><span>FREE EJU RESOURCE</span><h2>{t.freeTitle}</h2><p>{t.freeBody}</p><ul>{t.freeList.map(x => <li key={x}>✓ {x}</li>)}</ul><div><button type="button" className="button" onClick={requestFreeLesson}>{t.free} →</button><a href="#contact">{t.join} ↗</a></div></div></article><div className="resource-grid">{cards.map(card => <article key={card[0]}><span>{card[0]}</span><h3>{card[1]}</h3><p>{card[2]}</p><a href="#contact">{card[3]} →</a></article>)}</div></section>
 
     <section className="exam-shop section" id="past-exams"><div className="section-head"><div><p className="kicker">{t.examKicker}</p><h2>{t.examTitle}</h2></div><p>{t.examLead}</p></div>{exams.length ? <div className="exam-grid">{exams.map(item => <article key={item.id}><div className="exam-card-top"><span>{item.examYear}</span><small>{item.subject}</small></div><p className="exam-school">{item.schoolName}</p><h3>{item.title}</h3><p className="exam-meta">{[item.faculty, item.category].filter(Boolean).join(" · ")}</p><p className="exam-description">{item.description || t.protected}</p><div className="exam-price"><strong>¥{item.priceYen.toLocaleString()}</strong><small>{t.yen}</small></div><p className="protected-note">🔒 {t.protected}</p><div className="exam-actions">{item.previewUrl && <a href={item.previewUrl} target="_blank" rel="noreferrer">{t.preview} ↗</a>}{item.purchaseUrl ? <a className="button copper" href={item.purchaseUrl} target="_blank" rel="noreferrer">{t.buy} →</a> : <button className="button copper" onClick={() => inquireAbout(item)}>{t.inquire} →</button>}</div></article>)}</div> : <div className="exam-empty"><span>過去問</span><p>{t.examEmpty}</p></div>}</section>
 
@@ -213,7 +240,7 @@ export default function Home() {
 
     <section className="paper section services"><div className="section-head"><h2>{t.services}</h2></div><div className="service-grid">{t.serviceCards.map((x, i) => <article key={x[0]}><span>0{i + 1}</span><h3>{x[0]}</h3><p>{x[1]}</p><a href="#contact">{t.consult} →</a></article>)}</div></section>
 
-    <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={e => e.preventDefault()}><label>{t.name}<input required/></label><label>{t.email}<input type="email" required/></label><label>{t.message}<textarea value={contactMessage} onChange={e => setContactMessage(e.target.value)}/></label><button className="button">{t.send} ↗</button></form></section>
+    <section className="contact section" id="contact"><div><p className="kicker">YOUR STORY STARTS HERE</p><h2>{t.contactTitle}</h2><p>{t.contactBody}</p></div><form onSubmit={submitContact}><label>{t.name}<input name="name" autoComplete="name" maxLength={100} required/></label><label>{t.email}<input name="email" type="email" autoComplete="email" maxLength={254} required/></label><label>{t.message}<textarea name="message" maxLength={3000} required value={contactMessage} onChange={e => { setContactMessage(e.target.value); setContactState("idle"); }}/></label><input className="contact-honeypot" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"/><button className="button" disabled={contactState === "sending"}>{contactState === "sending" ? t.sending : `${t.send} ↗`}</button>{contactState !== "idle" && contactState !== "sending" && <p className={`contact-feedback ${contactState}`} role={contactState === "error" ? "alert" : "status"}>{contactState === "sent" ? t.sent : t.sendError}</p>}</form></section>
     <footer><div className="brand"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>Study resources · University data · Admissions tools</small></span></div><span>© 2026 EBI STUDYING IN JAPAN · <Link href="/admin">{t.admin}</Link></span></footer>
   </main>;
 }

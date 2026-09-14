@@ -15,6 +15,13 @@
       "when": 1786920184580,
       "tag": "0001_chunky_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789356385913,
+      "tag": "0002_colorful_silverclaw",
+      "breakpoints": true
     }
   ]
 }
