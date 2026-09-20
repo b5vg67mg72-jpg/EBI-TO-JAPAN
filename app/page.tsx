@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
-type Lang = "ja" | "en" | "zh";
+type Lang = "ja" | "en" | "zh" | "zh-TW";
 type AnalysisResult = {
   label: string;
   score: number;
@@ -97,6 +97,26 @@ const copy = {
     services: "把学习与升学支持连成一条清晰路径。", serviceCards: [["EJU月课", "精听精读、学习规划、答疑"], ["一对一辅导", "薄弱科目与校内考准备"], ["大学升学全程规划", "选校、出愿材料、志望理由书、面试"]],
     contactTitle: "迈向日本的第一步，从这里开始。", contactBody: "即使还没有决定也没关系。先告诉我们你的情况和目标。", name: "姓名", email: "邮箱", message: "希望咨询的内容", send: "预约免费咨询", sending: "正在发送…", sent: "已收到您的咨询，工作人员会尽快与您联系。", sendError: "发送失败，请稍后重试。", freeRequest: "我想领取免费的EJU课程。",
   },
+  "zh-TW": {
+    nav: ["EJU 資料", "錄播課程", "英語備考", "校內考歷屆試題", "大學資訊", "AI 工具"], consult: "免費諮詢",
+    eyebrow: "EBI 日本留學學習資料庫", heroA: "日本留學備考，", heroB: "從這裡開始。", lead: "EJU 資料、錄播課程與英語考試準備，都集中在一個清晰的網站中。根據目標，快速找到需要的內容。",
+    free: "觀看免費 EJU 課程", proof: ["按科目整理", "手機適用", "持續更新"], areas: "三大學習專區。", areaLead: "按照考試資料、錄播課程、英語備考的順序整理，讓下一步一目了然。",
+    cards: [["01", "EJU 資料", "免費影片、日語、文綜、數學、理科", "查看科目資料"], ["02", "錄播課程", "從基礎到練習，可反覆觀看", "查看全部課程"], ["03", "英語備考", "TOEFL、TOEIC 與大學要求", "查看英語備考"]],
+    freeTitle: "EJU 日語精聽精讀入門", freeBody: "先體驗一堂簡短的免費課程，學習不止於做題的複習方法。", freeList: ["精聽精讀基本步驟", "把錯誤轉化為得分", "容易執行的複習流程"], join: "加入學習群",
+    dataKicker: "大學資料", dataA: "不憑感覺，", dataB: "用資料選擇大學。", dataBody: "整理招生簡章、科系、EJU 與英語要求及申請時間，形成可執行的申請計畫。",
+    publicTitle: "所有人皆可查看", publicItems: ["招生簡章與申請時間", "科系與考試科目", "公開的錄取率與報考倍率"], memberTitle: "課程學員限定", memberItems: ["大學分數定位分析", "歷屆試題出題趨勢", "個人選校與時間規劃"],
+    aiKicker: "志望理由書 AI DETECTOR", aiTitle: "志望理由書 AI 偵測器", aiBody: "針對日本大學志望理由書，從文風、模板化表達、具體程度和個人經歷等面向評估 AI 生成風險。文章僅在瀏覽器中分析，不會儲存。",
+    statement: "需要檢查的志望理由書", statementPh: "請貼上志望理由書", reference: "參考文章（選填）", referencePh: "請貼上範本或參考文章", aiBtn: "分析 AI 風險", simBtn: "檢查相似度", sample: "填入範例", inputNeeded: "請檢查輸入內容", empty: "請先輸入志望理由書。", referenceRequired: "進行相似度檢查前，請先填寫參考文章。", confidence: "判定可信度", tooShort: "為提高準確度，請輸入至少 120 字。", privacy: "輸入內容不會上傳或儲存", detectorNote: "支援日語、中文和英語", textStats: ["文章語言", "字數", "句數"], languageNames: ["日語", "中文", "英語", "混合／未知"], sentencesUnit: "句",
+    aiLabel: "AI 生成的可能性", simLabel: "文章相似度", low: "較低", mid: "中等", high: "較高", aiReason: "根據行文一致性、模板化表達和具體個人經歷的數量估算。", simReason: "比較文章內部的較長片段，並與您提供的參考文章進行比對。", disclaimer: "結果僅供參考，不能證明文章由 AI 生成或涉及抄襲，也不會搜尋整個網際網路。",
+    chars: "字", clear: "清除內容", signals: "偵測到的特徵", suggestions: "修改建議", noSignals: "沒有發現明顯問題。",
+    metricNames: ["文風一致性", "模板化表達", "具體資訊", "個人表達", "詞彙多樣性", "文內重複", "參考文重合度"],
+    flagTexts: ["句子長度和行文節奏過於一致。", "文章中出現較多模板或連接用語。", "個人經歷、數字、課程名稱等具體資訊較少。", "文章內部有較長的重複片段。", "部分較長片段與參考文章重合。", "呈現本人行動或感受的第一人稱表達較少。", "詞彙種類較少，相似用詞反覆出現。"],
+    advice: ["加入只有您本人才能寫出的經歷，並依情境、行動、結果展開。", "不要只寫大學名稱，請說明具體課程、研究室、教授或制度與目標的關係。", "檢查長度相近的連續句子，適當搭配長句和短句。", "把模板化表達改成反映您真實體驗的語言。", "不要照搬參考文章，請依自己的經歷重新組織相似段落。", "加入『我看到了什麼、怎麼想、做了什麼』等本人視角。", "把重複的名詞或形容詞換成更準確、具體的描述。"],
+    uploadKicker: "最新資料", uploadTitle: "最新學習資料", uploadLead: "管理員上傳並發布後，資料會立即顯示在這裡，不需重新部署網站。", download: "下載資料", groupOnly: "加入學習群取得", noUploads: "新的公開資料正在準備中。", admin: "管理員登入",
+    examKicker: "校內考歷屆試題商店", examTitle: "大學校內考歷屆試題", examLead: "可依大學、學部、年度和科目查看試題。購買前請確認商品資訊，並可先查看試閱檔案。", examEmpty: "校內考歷屆試題商品正在準備中。", preview: "查看試閱", buy: "立即購買", inquire: "諮詢購買", yen: "日圓", protected: "購買後取得完整試題檔案。",
+    services: "讓學習與升學支援形成清晰的路徑。", serviceCards: [["EJU 月課", "精聽精讀、學習規劃、答疑"], ["一對一輔導", "弱項科目與校內考準備"], ["大學升學全程規劃", "選校、申請資料、志望理由書、面試"]],
+    contactTitle: "邁向日本的第一步，從這裡開始。", contactBody: "即使還沒有決定也沒關係。先告訴我們您的情況和目標。", name: "姓名", email: "電子郵件", message: "希望諮詢的內容", send: "預約免費諮詢", sending: "正在傳送…", sent: "已收到您的諮詢，工作人員會盡快與您聯絡。", sendError: "傳送失敗，請稍後重試。", freeRequest: "我想領取免費的 EJU 課程。",
+  },
 } as const;
 
 function normalizeText(value: string) { return value.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, ""); }
@@ -132,6 +152,7 @@ export default function Home() {
     ja: "私は高校二年生のとき、地元商店街の空き店舗調査に参加しました。店主十五人に話を聞く中で、売上だけでは地域の価値を説明できないと気づきました。そこで来店理由と滞在時間を記録するアンケートを提案し、三人の仲間と二か月間調査しました。この経験から、人の行動をデータで捉え、地域政策につなげる経済学を学びたいと考えました。貴学の地域経済論とフィールドワークを通じて、地域の小規模事業者が継続できる仕組みを研究したいです。",
     en: "During my second year of high school, I joined a survey of vacant shops in my local shopping district. After interviewing fifteen shop owners, I realized that sales figures alone could not explain the district's value. I proposed tracking visitors' reasons and time spent in the area, then conducted a two-month survey with three classmates. That experience made me want to study how behavioral data can inform regional economic policy. Through your fieldwork program, I hope to research practical ways for small local businesses to remain sustainable.",
     zh: "高中二年级时，我参加了家乡商店街的空置店铺调查。在采访十五位店主的过程中，我发现只看销售额无法说明一个地区真正的价值。于是我提出记录顾客来访原因和停留时间，并和三位同学连续调查了两个月。这段经历让我希望学习如何用行为数据分析地区经济，并把研究结果用于实际政策。进入贵校后，我想通过地区经济课程和实地调查，研究帮助小型商户持续经营的方法。",
+    "zh-TW": "高中二年級時，我參加了家鄉商店街的閒置店面調查。在訪問十五位店主的過程中，我發現只看營業額無法說明一個地區真正的價值。於是我提出記錄顧客來訪原因和停留時間，並和三位同學連續調查了兩個月。這段經歷讓我希望學習如何用行為資料分析地方經濟，並將研究結果運用於實際政策。進入貴校後，我想透過地方經濟課程和實地調查，研究協助小型商家持續經營的方法。",
   };
 
   useEffect(() => {
@@ -196,7 +217,7 @@ export default function Home() {
   const studyUploads = uploads.filter(item => item.resourceKind !== "exam");
 
   function inquireAbout(item: UploadedResource) {
-    const message = lang === "ja" ? `「${item.title}」（${item.schoolName}・${item.examYear}・${item.subject}）の購入を希望します。` : lang === "en" ? `I would like to purchase “${item.title}” (${item.schoolName}, ${item.examYear}, ${item.subject}).` : `我想购买《${item.title}》（${item.schoolName}・${item.examYear}・${item.subject}）。`;
+    const message = lang === "ja" ? `「${item.title}」（${item.schoolName}・${item.examYear}・${item.subject}）の購入を希望します。` : lang === "en" ? `I would like to purchase “${item.title}” (${item.schoolName}, ${item.examYear}, ${item.subject}).` : lang === "zh-TW" ? `我想購買《${item.title}》（${item.schoolName}・${item.examYear}・${item.subject}）。` : `我想购买《${item.title}》（${item.schoolName}・${item.examYear}・${item.subject}）。`;
     setContactMessage(message);
     requestAnimationFrame(() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }));
   }
@@ -224,7 +245,7 @@ export default function Home() {
   }
 
   return <main>
-    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => { setLang(e.target.value as Lang); setResult(null); setToolError(""); }}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
+    <header className="topbar"><a className="brand" href="#top"><img src="/ebi-icon.png" alt="EBI" width="44" height="44"/><span><b>EBI Studying in Japan</b><small>{lang === "zh" ? "日本留学支持" : lang === "zh-TW" ? "日本留學支援" : lang === "en" ? "Japan Study Support" : "日本留学サポート"}</small></span></a><nav>{t.nav.map((x, i) => <a key={x} href={["#resources", "#resources", "#resources", "#past-exams", "#data", "#ai"][i]}>{x}</a>)}</nav><div className="actions"><select aria-label="Language" value={lang} onChange={e => { setLang(e.target.value as Lang); setResult(null); setToolError(""); }}><option value="ja">日本語</option><option value="en">English</option><option value="zh">简体中文</option><option value="zh-TW">繁體中文</option></select><a className="button small" href="#contact">{t.consult}</a></div></header>
 
     <section className="hero" id="top"><div><p className="kicker">{t.eyebrow}</p><h1>{t.heroA}<em>{t.heroB}</em></h1><p className="lead">{t.lead}</p><a className="button" href="#free">{t.free} ↓</a><div className="proof">{t.proof.map(x => <span key={x}>✓ {x}</span>)}</div></div><div className="hero-stack">{cards.map(card => <a href="#resources" key={card[0]}><span>{card[0]}</span><div><small>EBI RESOURCE</small><h2>{card[1]}</h2><p>{card[2]}</p></div><b>→</b></a>)}</div></section>
 
