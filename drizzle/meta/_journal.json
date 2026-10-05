@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1786920154742,
+      "tag": "0000_faulty_cerebro",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786920184580,
+      "tag": "0001_chunky_paibok",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789356385913,
+      "tag": "0002_colorful_silverclaw",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+name = "ebi-admissions-api"
+main = "worker.js"
+compatibility_date = "2026-10-05"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ebi-admissions-secure"
+database_id = "5ffa150b-0cd7-4d07-8f59-fa4c852ba123"
+
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "73104"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
